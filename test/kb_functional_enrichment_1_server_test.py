@@ -3,7 +3,8 @@ import unittest
 import os  # noqa: F401
 import json  # noqa: F401
 import time
-import requests
+import requests  # noqa: F401
+import shutil
 
 from os import environ
 try:
@@ -17,6 +18,8 @@ from biokbase.workspace.client import Workspace as workspaceService
 from kb_functional_enrichment_1.kb_functional_enrichment_1Impl import kb_functional_enrichment_1
 from kb_functional_enrichment_1.kb_functional_enrichment_1Server import MethodContext
 from kb_functional_enrichment_1.authclient import KBaseAuth as _KBaseAuth
+from kb_functional_enrichment_1.Utils.FunctionalEnrichmentUtil import FunctionalEnrichmentUtil
+from GenomeFileUtil.GenomeFileUtilClient import GenomeFileUtil
 
 
 class kb_functional_enrichment_1Test(unittest.TestCase):
@@ -51,23 +54,39 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
         cls.scratch = cls.cfg['scratch']
         cls.callback_url = os.environ['SDK_CALLBACK_URL']
 
+        cls.fe1_runner = FunctionalEnrichmentUtil(cls.cfg)
+        cls.gfu = GenomeFileUtil(cls.callback_url)
+
+        suffix = int(time.time() * 1000)
+        cls.wsName = "test_kb_stringtie_" + str(suffix)
+        cls.wsClient.create_workspace({'workspace': cls.wsName})
+
+        cls.prepare_data()
+
     @classmethod
     def tearDownClass(cls):
         if hasattr(cls, 'wsName'):
             cls.wsClient.delete_workspace({'workspace': cls.wsName})
             print('Test workspace was deleted')
 
+    @classmethod
+    def prepare_data(cls):
+        # upload genome object
+        genbank_file_name = 'minimal.gbff'
+        genbank_file_path = os.path.join(cls.scratch, genbank_file_name)
+        shutil.copy(os.path.join('data', genbank_file_name), genbank_file_path)
+
+        genome_object_name = 'test_Genome'
+        cls.genome_ref = cls.gfu.genbank_to_genome({'file': {'path': genbank_file_path},
+                                                    'workspace_name': cls.wsName,
+                                                    'genome_name': genome_object_name
+                                                    })['genome_ref']
+
     def getWsClient(self):
         return self.__class__.wsClient
 
     def getWsName(self):
-        if hasattr(self.__class__, 'wsName'):
-            return self.__class__.wsName
-        suffix = int(time.time() * 1000)
-        wsName = "test_kb_functional_enrichment_1_" + str(suffix)
-        ret = self.getWsClient().create_workspace({'workspace': wsName})  # noqa
-        self.__class__.wsName = wsName
-        return wsName
+        return self.__class__.wsName
 
     def getImpl(self):
         return self.__class__.serviceImpl
@@ -75,15 +94,19 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
     def getContext(self):
         return self.__class__.ctx
 
-    # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
-    def test_your_method(self):
-        # Prepare test objects in workspace if needed using
-        # self.getWsClient().save_objects({'workspace': self.getWsName(),
-        #                                  'objects': []})
-        #
-        # Run your method by
-        # ret = self.getImpl().your_method(self.getContext(), parameters...)
-        #
-        # Check returned data with
-        # self.assertEqual(ret[...], ...) or other unittest methods
-        pass
+    def test_bad_run_fe1_params(self):
+        invalidate_input_params = {
+          'missing_genome_ref': 'genome_ref',
+          'workspace_name': 'workspace_name'
+        }
+        with self.assertRaisesRegexp(
+                    ValueError, '"genome_ref" parameter is required, but missing'):
+            self.getImpl().run_fe1(self.getContext(), invalidate_input_params)
+
+        invalidate_input_params = {
+          'genome_ref': 'genome_ref',
+          'missing_workspace_name': 'workspace_name'
+        }
+        with self.assertRaisesRegexp(
+                    ValueError, '"workspace_name" parameter is required, but missing'):
+            self.getImpl().run_fe1(self.getContext(), invalidate_input_params)
