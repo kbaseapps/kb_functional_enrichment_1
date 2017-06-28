@@ -1,9 +1,11 @@
 import time
 import json
+import re
 
 from Workspace.WorkspaceClient import Workspace as Workspace
 from DataFileUtil.DataFileUtilClient import DataFileUtil
-# from KBaseReport.KBaseReportClient import KBaseReport
+from KBaseReport.KBaseReportClient import KBaseReport
+from GenomeSearchUtil.GenomeSearchUtilClient import GenomeSearchUtil
 
 
 def log(message, prefix_newline=False):
@@ -26,13 +28,57 @@ class FunctionalEnrichmentUtil:
             if p not in params:
                 raise ValueError('"{}" parameter is required, but missing'.format(p))
 
+    def _get_go_maps_from_genome(self, genome_ref):
+        """
+        _search_genome: search genome data
+        """
+
+        feature_num = self.gsu.search({'ref': genome_ref})['num_found']
+
+        genome_features = self.gsu.search({'ref': genome_ref,
+                                           'limit': feature_num,
+                                           'sort_by': [['feature_id', True]]})['features']
+
+        feature_id_go_id_list_map = {}
+        go_id_feature_id_list_map = {}
+        go_id_go_term_map = {}
+        feature_id_feature_info_map = {}
+        for genome_feature in genome_features:
+            feature_id = genome_feature.get('feature_id')
+            feature_func = genome_feature.get('function')
+            feature_type = genome_feature.get('feature_type')
+            ontology_terms = genome_feature.get('ontology_terms')
+
+            go_id_list = []
+            if ontology_terms:
+                for ontology_id, ontology_term in ontology_terms.iteritems():
+                    if re.match('[gG][oO]\:.*', ontology_id):
+                        go_id_go_term_map.update({ontology_id: ontology_term})
+                        go_id_list.append(ontology_id)
+
+            if go_id_list:
+                feature_id_go_id_list_map.update({feature_id: go_id_list})
+                feature_id_feature_info_map.update({feature_id: {'function': feature_func,
+                                                                 'feature_type': feature_type}})
+                for go_id in go_id_list:
+                    if go_id in go_id_feature_id_list_map:
+                        feature_ids = go_id_feature_id_list_map.get(go_id)
+                        feature_ids.append(feature_id)
+                        go_id_feature_id_list_map.update({go_id: feature_ids})
+                    else:
+                        go_id_feature_id_list_map.update({go_id: [feature_id]})
+
+        return (feature_id_go_id_list_map, go_id_feature_id_list_map,
+                go_id_go_term_map, feature_id_feature_info_map)
+
     def __init__(self, config):
-        self.ws_url = config["workspace-url"]
+        self.ws_url = config['workspace-url']
         self.callback_url = config['SDK_CALLBACK_URL']
         self.token = config['KB_AUTH_TOKEN']
         self.shock_url = config['shock-url']
         self.scratch = config['scratch']
         self.dfu = DataFileUtil(self.callback_url)
+        self.gsu = GenomeSearchUtil(self.callback_url)
         self.ws = Workspace(self.ws_url, token=self.token)
 
     def run_fe1(self, params):
@@ -55,3 +101,23 @@ class FunctionalEnrichmentUtil:
             'params:\n{}'.format(json.dumps(params, indent=1)))
 
         self._validate_run_fe1_params(params)
+
+        genome_ref = params.get('genome_ref')
+        (feature_id_go_id_list_map, go_id_feature_id_list_map,
+         go_id_go_term_map, feature_id_feature_info_map) = self._get_go_maps_from_genome(genome_ref)
+
+        print 'fdsafsd'
+        print feature_id_go_id_list_map[feature_id_go_id_list_map.keys()[0]]
+        print feature_id_go_id_list_map[feature_id_go_id_list_map.keys()[-1]]
+        print len(feature_id_go_id_list_map)
+        print go_id_feature_id_list_map[go_id_feature_id_list_map.keys()[0]]
+        print go_id_feature_id_list_map[go_id_feature_id_list_map.keys()[-1]]
+        print len(go_id_feature_id_list_map)
+        print go_id_go_term_map[go_id_go_term_map.keys()[0]]
+        print go_id_go_term_map[go_id_go_term_map.keys()[-1]]
+        print len(go_id_go_term_map)
+        print feature_id_feature_info_map[feature_id_feature_info_map.keys()[0]]
+        print feature_id_feature_info_map[feature_id_feature_info_map.keys()[-1]]
+        print len(feature_id_feature_info_map)
+
+        return {'a': 'a'}
