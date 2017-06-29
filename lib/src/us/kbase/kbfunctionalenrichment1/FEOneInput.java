@@ -17,8 +17,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * required params:
  * genome_ref: Genome object reference
  * workspace_name: the name of the workspace it gets saved to
- * optional params:
- * num_threads: number of threads
  * </pre>
  * 
  */
@@ -26,8 +24,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "genome_ref",
-    "workspace_name",
-    "num_threads"
+    "workspace_name"
 })
 public class FEOneInput {
 
@@ -35,8 +32,6 @@ public class FEOneInput {
     private String genomeRef;
     @JsonProperty("workspace_name")
     private String workspaceName;
-    @JsonProperty("num_threads")
-    private Long numThreads;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("genome_ref")
@@ -69,21 +64,6 @@ public class FEOneInput {
         return this;
     }
 
-    @JsonProperty("num_threads")
-    public Long getNumThreads() {
-        return numThreads;
-    }
-
-    @JsonProperty("num_threads")
-    public void setNumThreads(Long numThreads) {
-        this.numThreads = numThreads;
-    }
-
-    public FEOneInput withNumThreads(Long numThreads) {
-        this.numThreads = numThreads;
-        return this;
-    }
-
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
@@ -96,7 +76,7 @@ public class FEOneInput {
 
     @Override
     public String toString() {
-        return ((((((((("FEOneInput"+" [genomeRef=")+ genomeRef)+", workspaceName=")+ workspaceName)+", numThreads=")+ numThreads)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((("FEOneInput"+" [genomeRef=")+ genomeRef)+", workspaceName=")+ workspaceName)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

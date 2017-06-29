@@ -124,7 +124,6 @@ $returnVal is a kb_functional_enrichment_1.FEOneResult
 FEOneInput is a reference to a hash where the following keys are defined:
 	genome_ref has a value which is a kb_functional_enrichment_1.obj_ref
 	workspace_name has a value which is a string
-	num_threads has a value which is an int
 obj_ref is a string
 FEOneResult is a reference to a hash where the following keys are defined:
 	result_directory has a value which is a string
@@ -142,7 +141,6 @@ $returnVal is a kb_functional_enrichment_1.FEOneResult
 FEOneInput is a reference to a hash where the following keys are defined:
 	genome_ref has a value which is a kb_functional_enrichment_1.obj_ref
 	workspace_name has a value which is a string
-	num_threads has a value which is an int
 obj_ref is a string
 FEOneResult is a reference to a hash where the following keys are defined:
 	result_directory has a value which is a string
@@ -370,9 +368,6 @@ required params:
 genome_ref: Genome object reference
 workspace_name: the name of the workspace it gets saved to
 
-optional params:
-num_threads: number of threads
-
 
 =item Definition
 
@@ -382,7 +377,6 @@ num_threads: number of threads
 a reference to a hash where the following keys are defined:
 genome_ref has a value which is a kb_functional_enrichment_1.obj_ref
 workspace_name has a value which is a string
-num_threads has a value which is an int
 
 </pre>
 
@@ -393,7 +387,6 @@ num_threads has a value which is an int
 a reference to a hash where the following keys are defined:
 genome_ref has a value which is a kb_functional_enrichment_1.obj_ref
 workspace_name has a value which is a string
-num_threads has a value which is an int
 
 
 =end text

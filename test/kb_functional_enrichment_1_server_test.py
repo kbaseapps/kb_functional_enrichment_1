@@ -96,22 +96,22 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
     def getContext(self):
         return self.__class__.ctx
 
-    # def test_bad_run_fe1_params(self):
-    #     invalidate_input_params = {
-    #       'missing_genome_ref': 'genome_ref',
-    #       'workspace_name': 'workspace_name'
-    #     }
-    #     with self.assertRaisesRegexp(
-    #                 ValueError, '"genome_ref" parameter is required, but missing'):
-    #         self.getImpl().run_fe1(self.getContext(), invalidate_input_params)
+    def test_bad_run_fe1_params(self):
+        invalidate_input_params = {
+          'missing_genome_ref': 'genome_ref',
+          'workspace_name': 'workspace_name'
+        }
+        with self.assertRaisesRegexp(
+                    ValueError, '"genome_ref" parameter is required, but missing'):
+            self.getImpl().run_fe1(self.getContext(), invalidate_input_params)
 
-    #     invalidate_input_params = {
-    #       'genome_ref': 'genome_ref',
-    #       'missing_workspace_name': 'workspace_name'
-    #     }
-    #     with self.assertRaisesRegexp(
-    #                 ValueError, '"workspace_name" parameter is required, but missing'):
-    #         self.getImpl().run_fe1(self.getContext(), invalidate_input_params)
+        invalidate_input_params = {
+          'genome_ref': 'genome_ref',
+          'missing_workspace_name': 'workspace_name'
+        }
+        with self.assertRaisesRegexp(
+                    ValueError, '"workspace_name" parameter is required, but missing'):
+            self.getImpl().run_fe1(self.getContext(), invalidate_input_params)
 
     def test_run_fe1(self):
 
@@ -122,4 +122,10 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
 
         result = self.getImpl().run_fe1(self.getContext(), input_params)[0]
 
-        print result
+        self.assertTrue('result_directory' in result)
+        result_files = os.listdir(result['result_directory'])
+        print result_files
+        expect_result_files = ['functional_enrichment.csv']
+        self.assertTrue(all(x in result_files for x in expect_result_files))
+        self.assertTrue('report_name' in result)
+        self.assertTrue('report_ref' in result)

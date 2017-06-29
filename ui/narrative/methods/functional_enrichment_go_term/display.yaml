@@ -1,0 +1,33 @@
+#
+# Define basic display information
+#
+name     : Functional Enrichment For GO Term - v1.0.0
+
+tooltip  : |
+    Create GO term enrichment from feature set and reference genome
+screenshots :
+    []
+
+#
+# Define the set of other narrative methods that should be suggested to the user.
+#
+method-suggestions :
+    related :
+        []
+    next :
+        []
+
+
+#
+# Configure the display and description of the parameters
+#
+
+parameters :
+  genome_ref :
+    ui-name : |
+      Reference Genome
+    short-hint : |
+      Reference Genome
+
+description : |
+    <p></p>
