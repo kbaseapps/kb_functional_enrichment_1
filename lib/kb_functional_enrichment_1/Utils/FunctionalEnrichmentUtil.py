@@ -89,10 +89,12 @@ class FunctionalEnrichmentUtil:
         result_file = os.path.join(result_directory, 'functional_enrichment.csv')
         with open(result_file, 'wb') as csv_file:
             writer = csv.writer(csv_file)
-            writer.writerow(['go_id', 'go_term', 'raw_p_value', 'adjusted_p_value'])
+            writer.writerow(['go_id', 'go_term', 'num_in_feature_set',
+                             'num_in_ref_genome', 'raw_p_value', 'adjusted_p_value'])
             for key, value in enrichment_map.iteritems():
-                writer.writerow([key, value['go_term'],
-                                 value['raw_p_value'], value['adjusted_p_value']])
+                writer.writerow([key, value['go_term'], value['num_in_subset_feature_set'],
+                                 value['num_in_ref_genome'], value['raw_p_value'],
+                                 value['adjusted_p_value']])
 
         output_files.append({'path': result_file,
                              'name': os.path.basename(result_file),
@@ -117,9 +119,9 @@ class FunctionalEnrichmentUtil:
         data = csv.reader(open(os.path.join(result_directory, 'functional_enrichment.csv')),
                           delimiter=',')
         data.next()
-        sortedlist = sorted(data, key=operator.itemgetter(3), reverse=True)
+        sortedlist = sorted(data, key=operator.itemgetter(4), reverse=True)
         for row in sortedlist[:20]:
-            enrichment_table += '<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>'.format(*row)
+            enrichment_table += '<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>'.format(*row)
 
         with open(result_file_path, 'w') as result_file:
             with open(os.path.join(os.path.dirname(__file__), 'report_template.html'),
@@ -227,7 +229,7 @@ class FunctionalEnrichmentUtil:
         feature_ids = feature_id_feature_info_map.keys()
 
         enrichment_map = {}
-        go_raw_p_value = {}
+        go_info_map = {}
         all_raw_p_value = []
         for go_id, go_term in go_id_go_term_map.iteritems():
             mapped_features = go_id_feature_id_list_map.get(go_id)
@@ -242,16 +244,21 @@ class FunctionalEnrichmentUtil:
 
             raw_p_value = fisher.pvalue(a, b, c, d).left_tail
             all_raw_p_value.append(raw_p_value)
-            go_raw_p_value.update({go_id: raw_p_value})
+            go_info_map.update({go_id: {'raw_p_value': raw_p_value,
+                                        'num_in_ref_genome': len(mapped_features),
+                                        'num_in_subset_feature_set': a}})
 
         stats = importr('stats')
         adjusted_p_values = stats.p_adjust(FloatVector(all_raw_p_value), method='fdr')
 
-        for go_id, raw_p_value in go_raw_p_value.iteritems():
+        for go_id, go_info in go_info_map.iteritems():
             pos = all_raw_p_value.index(raw_p_value)
             adjusted_p_value = adjusted_p_values[pos]
-            enrichment_map.update({go_id: {'raw_p_value': raw_p_value,
+            enrichment_map.update({go_id: {'raw_p_value': go_info.get('raw_p_value'),
                                            'adjusted_p_value': adjusted_p_value,
+                                           'num_in_ref_genome': go_info.get('num_in_ref_genome'),
+                                           'num_in_subset_feature_set': go_info.get(
+                                                                    'num_in_subset_feature_set'),
                                            'go_term': go_id_go_term_map.get(go_id)}})
 
         returnVal = {'result_directory': result_directory}
