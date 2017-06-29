@@ -108,7 +108,7 @@ div.desc {
         <th onclick="sortTable(0)">GO ID</th>
         <th onclick="sortTable(1)">GO Term</th>
         <th onclick="sortTable(2)">Number in FeatureSet</th>
-        <th onclick="sortTable(3)">Number in reference Genome</th>
+        <th onclick="sortTable(3)">Number in Reference Genome</th>
         <th onclick="sortTable(4)">Raw p-value</th>
         <th onclick="sortTable(5)">Corrected p-value</th>
     </tr>
@@ -191,16 +191,33 @@ function sortTable(n) {
       /*check if the two rows should switch place,
       based on the direction, asc or desc:*/
       if (dir == "asc") {
-        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-          //if so, mark as a switch and break the loop:
-          shouldSwitch= true;
-          break;
+        if (isNaN(x.innerHTML)){
+            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+              //if so, mark as a switch and break the loop:
+              shouldSwitch= true;
+              break;
+            }
+        } else {
+            if (parseFloat(x.innerHTML) > parseFloat(y.innerHTML)) {
+              //if so, mark as a switch and break the loop:
+              shouldSwitch= true;
+              break;
+            }
         }
       } else if (dir == "desc") {
-        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-          //if so, mark as a switch and break the loop:
-          shouldSwitch= true;
-          break;
+        if (isNaN(x.innerHTML)){
+            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+              //if so, mark as a switch and break the loop:
+              shouldSwitch= true;
+              break;
+            }
+        } else {
+            if (parseFloat(x.innerHTML) < parseFloat(y.innerHTML)) {
+              //if so, mark as a switch and break the loop:
+              shouldSwitch= true;
+              break;
+            }
+            
         }
       }
     }
