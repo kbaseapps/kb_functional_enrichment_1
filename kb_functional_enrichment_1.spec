@@ -16,16 +16,10 @@ module kb_functional_enrichment_1 {
       required params:
       genome_ref: Genome object reference
       workspace_name: the name of the workspace it gets saved to
-
-      optional params:
-      num_threads: number of threads
-      
     */
     typedef structure{
         obj_ref genome_ref;
         string workspace_name;
-
-        int num_threads;
     } FEOneInput;
 
     /*
@@ -38,7 +32,6 @@ module kb_functional_enrichment_1 {
         string report_name;
         string report_ref;
     }FEOneResult;
-
 
     /*  
         run_fe1: run functional enrichment one
