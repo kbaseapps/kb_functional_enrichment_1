@@ -42,7 +42,6 @@ class FunctionalEnrichmentUtil:
         _validate_run_fe1_params:
                 validates params passed to run_fe1 method
         """
-
         log('start validating run_fe1 params')
 
         # check for required parameters
@@ -51,7 +50,6 @@ class FunctionalEnrichmentUtil:
                 raise ValueError('"{}" parameter is required, but missing'.format(p))
 
     def _generate_report(self, enrichment_map, result_directory, workspace_name):
-
         """
         _generate_report: generate summary report
         """
@@ -89,10 +87,11 @@ class FunctionalEnrichmentUtil:
         result_file = os.path.join(result_directory, 'functional_enrichment.csv')
         with open(result_file, 'wb') as csv_file:
             writer = csv.writer(csv_file)
-            writer.writerow(['go_id', 'go_term', 'num_in_feature_set',
+            writer.writerow(['term_id', 'term', 'ontology', 'num_in_feature_set',
                              'num_in_ref_genome', 'raw_p_value', 'adjusted_p_value'])
             for key, value in enrichment_map.iteritems():
-                writer.writerow([key, value['go_term'], value['num_in_subset_feature_set'],
+                writer.writerow([key, value['go_term'], value['namespace'],
+                                 value['num_in_subset_feature_set'],
                                  value['num_in_ref_genome'], value['raw_p_value'],
                                  value['adjusted_p_value']])
 
@@ -107,7 +106,6 @@ class FunctionalEnrichmentUtil:
         """
         _generate_html_report: generate html summary report
         """
-
         log('start generating html report')
         html_report = list()
 
@@ -119,9 +117,9 @@ class FunctionalEnrichmentUtil:
         data = csv.reader(open(os.path.join(result_directory, 'functional_enrichment.csv')),
                           delimiter=',')
         data.next()
-        sortedlist = sorted(data, key=operator.itemgetter(4), reverse=True)
+        sortedlist = sorted(data, key=operator.itemgetter(5), reverse=True)
         for row in sortedlist[:20]:
-            enrichment_table += '<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>'.format(*row)
+            enrichment_table += '<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>'.format(*row)
 
         with open(result_file_path, 'w') as result_file:
             with open(os.path.join(os.path.dirname(__file__), 'report_template.html'),
@@ -155,6 +153,7 @@ class FunctionalEnrichmentUtil:
         go_id_feature_id_list_map = {}
         go_id_go_term_map = {}
         feature_id_feature_info_map = {}
+
         for genome_feature in genome_features:
             feature_id = genome_feature.get('feature_id')
             feature_func = genome_feature.get('function')
@@ -186,6 +185,9 @@ class FunctionalEnrichmentUtil:
                 go_id_go_term_map, feature_id_feature_info_map)
 
     def _get_feature_set_ids(self):
+        """
+        _get_feature_set_ids: get subset feature ids from FeatureSet
+        """
         log('start generating feature set ids')
         feature_set_ids = ['AT1G01010', 'AT1G01030', 'AT1G01020', 'AT1G01050', 'AT1G01060']
         return feature_set_ids
@@ -246,20 +248,31 @@ class FunctionalEnrichmentUtil:
             all_raw_p_value.append(raw_p_value)
             go_info_map.update({go_id: {'raw_p_value': raw_p_value,
                                         'num_in_ref_genome': len(mapped_features),
-                                        'num_in_subset_feature_set': a}})
+                                        'num_in_subset_feature_set': a,
+                                        'pos': all_raw_p_value.index(raw_p_value)}})
 
         stats = importr('stats')
         adjusted_p_values = stats.p_adjust(FloatVector(all_raw_p_value), method='fdr')
 
+        ontologies = self.ws.get_objects([{'workspace': 'KBaseOntology',
+                                           'name': 'gene_ontology'},
+                                          {'workspace': 'KBaseOntology',
+                                           'name': 'plant_ontology'}])
+
+        ontology_hash = dict()
+        ontology_hash.update(ontologies[0]['data']['term_hash'])
+        ontology_hash.update(ontologies[1]['data']['term_hash'])
+
         for go_id, go_info in go_info_map.iteritems():
-            pos = all_raw_p_value.index(raw_p_value)
-            adjusted_p_value = adjusted_p_values[pos]
+            adjusted_p_value = adjusted_p_values[go_info.get('pos')]
+            namespace = ontology_hash[go_id]['namespace']
             enrichment_map.update({go_id: {'raw_p_value': go_info.get('raw_p_value'),
                                            'adjusted_p_value': adjusted_p_value,
                                            'num_in_ref_genome': go_info.get('num_in_ref_genome'),
                                            'num_in_subset_feature_set': go_info.get(
                                                                     'num_in_subset_feature_set'),
-                                           'go_term': go_id_go_term_map.get(go_id)}})
+                                           'go_term': go_id_go_term_map.get(go_id),
+                                           'namespace': namespace.split("_")[1][0].upper()}})
 
         returnVal = {'result_directory': result_directory}
         report_output = self._generate_report(enrichment_map,
