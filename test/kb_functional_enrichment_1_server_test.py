@@ -72,15 +72,15 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
     @classmethod
     def prepare_data(cls):
         # upload genome object
-        # genbank_file_name = 'minimal.gbff'
-        # genbank_file_path = os.path.join(cls.scratch, genbank_file_name)
-        # shutil.copy(os.path.join('data', genbank_file_name), genbank_file_path)
+        genbank_file_name = 'minimal.gbff'
+        genbank_file_path = os.path.join(cls.scratch, genbank_file_name)
+        shutil.copy(os.path.join('data', genbank_file_name), genbank_file_path)
 
-        # genome_object_name = 'test_Genome'
-        # cls.genome_ref = cls.gfu.genbank_to_genome({'file': {'path': genbank_file_path},
-        #                                             'workspace_name': cls.wsName,
-        #                                             'genome_name': genome_object_name
-        #                                             })['genome_ref']
+        genome_object_name = 'test_Genome'
+        cls.genome_ref = cls.gfu.genbank_to_genome({'file': {'path': genbank_file_path},
+                                                    'workspace_name': cls.wsName,
+                                                    'genome_name': genome_object_name
+                                                    })['genome_ref']
 
         cls.genome_ref = '5290/2/4'
 
