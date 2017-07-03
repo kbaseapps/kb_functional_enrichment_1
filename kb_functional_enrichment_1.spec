@@ -14,11 +14,11 @@ module kb_functional_enrichment_1 {
 
     /*
       required params:
-      genome_ref: Genome object reference
+      feature_set_ref: FeatureSet object reference
       workspace_name: the name of the workspace it gets saved to
     */
     typedef structure{
-        obj_ref genome_ref;
+        obj_ref feature_set_ref;
         string workspace_name;
     } FEOneInput;
 
@@ -35,7 +35,6 @@ module kb_functional_enrichment_1 {
 
     /*  
         run_fe1: run functional enrichment one
-
     */
     funcdef run_fe1(FEOneInput params)
         returns (FEOneResult returnVal) authentication required;
