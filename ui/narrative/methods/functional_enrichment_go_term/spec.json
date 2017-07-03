@@ -9,14 +9,14 @@
     "output" : "no-display"
   },
   "parameters" : [{
-    "id" : "genome_ref",
+    "id" : "feature_set_ref",
     "optional" : false,
     "advanced" : false,
     "allow_multiple" : false,
     "default_values" : [ "" ],
     "field_type" : "text",
     "text_options" : {
-      "valid_ws_types" : ["KBaseGenomes.Genome"]
+      "valid_ws_types" : ["KBaseCollections.FeatureSet"]
     }
   }],
   "behavior" : {
@@ -30,9 +30,9 @@
           "target_property" : "workspace_name"
         },
         {
-          "input_parameter" : "genome_ref",
+          "input_parameter" : "feature_set_ref",
           "target_type_transform": "resolved-ref",
-          "target_property" : "genome_ref"
+          "target_property" : "feature_set_ref"
         }],
       "output_mapping" : [
         {

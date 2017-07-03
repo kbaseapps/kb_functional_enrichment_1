@@ -23,11 +23,11 @@ method-suggestions :
 #
 
 parameters :
-  genome_ref :
+  feature_set_ref :
     ui-name : |
-      Reference Genome
+      Feature Set Object
     short-hint : |
-      Reference Genome
+      Feature Set Object
 
 description : |
     <p></p>
