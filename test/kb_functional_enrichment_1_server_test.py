@@ -72,17 +72,17 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
     @classmethod
     def prepare_data(cls):
         # upload genome object
-        genbank_file_name = 'minimal.gbff'
-        genbank_file_path = os.path.join(cls.scratch, genbank_file_name)
-        shutil.copy(os.path.join('data', genbank_file_name), genbank_file_path)
+        # genbank_file_name = 'minimal.gbff'
+        # genbank_file_path = os.path.join(cls.scratch, genbank_file_name)
+        # shutil.copy(os.path.join('data', genbank_file_name), genbank_file_path)
 
-        genome_object_name = 'test_Genome'
-        cls.genome_ref = cls.gfu.genbank_to_genome({'file': {'path': genbank_file_path},
-                                                    'workspace_name': cls.wsName,
-                                                    'genome_name': genome_object_name
-                                                    })['genome_ref']
+        # genome_object_name = 'test_Genome'
+        # cls.genome_ref = cls.gfu.genbank_to_genome({'file': {'path': genbank_file_path},
+        #                                             'workspace_name': cls.wsName,
+        #                                             'genome_name': genome_object_name
+        #                                             })['genome_ref']
 
-        cls.genome_ref = '5290/2/4'
+        cls.feature_set_ref = '2409/245/1'
 
     def getWsClient(self):
         return self.__class__.wsClient
@@ -98,15 +98,15 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
 
     def test_bad_run_fe1_params(self):
         invalidate_input_params = {
-          'missing_genome_ref': 'genome_ref',
+          'missing_feature_set_ref': 'feature_set_ref',
           'workspace_name': 'workspace_name'
         }
         with self.assertRaisesRegexp(
-                    ValueError, '"genome_ref" parameter is required, but missing'):
+                    ValueError, '"feature_set_ref" parameter is required, but missing'):
             self.getImpl().run_fe1(self.getContext(), invalidate_input_params)
 
         invalidate_input_params = {
-          'genome_ref': 'genome_ref',
+          'feature_set_ref': 'feature_set_ref',
           'missing_workspace_name': 'workspace_name'
         }
         with self.assertRaisesRegexp(
@@ -116,7 +116,7 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
     def test_run_fe1(self):
 
         input_params = {
-            'genome_ref': self.genome_ref,
+            'feature_set_ref': self.feature_set_ref,
             'workspace_name': self.getWsName()
         }
 

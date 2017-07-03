@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * <p>Original spec-file type: FEOneInput</p>
  * <pre>
  * required params:
- * genome_ref: Genome object reference
+ * feature_set_ref: FeatureSet object reference
  * workspace_name: the name of the workspace it gets saved to
  * </pre>
  * 
@@ -23,29 +23,29 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
-    "genome_ref",
+    "feature_set_ref",
     "workspace_name"
 })
 public class FEOneInput {
 
-    @JsonProperty("genome_ref")
-    private String genomeRef;
+    @JsonProperty("feature_set_ref")
+    private String featureSetRef;
     @JsonProperty("workspace_name")
     private String workspaceName;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
-    @JsonProperty("genome_ref")
-    public String getGenomeRef() {
-        return genomeRef;
+    @JsonProperty("feature_set_ref")
+    public String getFeatureSetRef() {
+        return featureSetRef;
     }
 
-    @JsonProperty("genome_ref")
-    public void setGenomeRef(String genomeRef) {
-        this.genomeRef = genomeRef;
+    @JsonProperty("feature_set_ref")
+    public void setFeatureSetRef(String featureSetRef) {
+        this.featureSetRef = featureSetRef;
     }
 
-    public FEOneInput withGenomeRef(String genomeRef) {
-        this.genomeRef = genomeRef;
+    public FEOneInput withFeatureSetRef(String featureSetRef) {
+        this.featureSetRef = featureSetRef;
         return this;
     }
 
@@ -76,7 +76,7 @@ public class FEOneInput {
 
     @Override
     public String toString() {
-        return ((((((("FEOneInput"+" [genomeRef=")+ genomeRef)+", workspaceName=")+ workspaceName)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((("FEOneInput"+" [featureSetRef=")+ featureSetRef)+", workspaceName=")+ workspaceName)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

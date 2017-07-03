@@ -122,7 +122,7 @@ sub new
 $params is a kb_functional_enrichment_1.FEOneInput
 $returnVal is a kb_functional_enrichment_1.FEOneResult
 FEOneInput is a reference to a hash where the following keys are defined:
-	genome_ref has a value which is a kb_functional_enrichment_1.obj_ref
+	feature_set_ref has a value which is a kb_functional_enrichment_1.obj_ref
 	workspace_name has a value which is a string
 obj_ref is a string
 FEOneResult is a reference to a hash where the following keys are defined:
@@ -139,7 +139,7 @@ FEOneResult is a reference to a hash where the following keys are defined:
 $params is a kb_functional_enrichment_1.FEOneInput
 $returnVal is a kb_functional_enrichment_1.FEOneResult
 FEOneInput is a reference to a hash where the following keys are defined:
-	genome_ref has a value which is a kb_functional_enrichment_1.obj_ref
+	feature_set_ref has a value which is a kb_functional_enrichment_1.obj_ref
 	workspace_name has a value which is a string
 obj_ref is a string
 FEOneResult is a reference to a hash where the following keys are defined:
@@ -365,7 +365,7 @@ a string
 =item Description
 
 required params:
-genome_ref: Genome object reference
+feature_set_ref: FeatureSet object reference
 workspace_name: the name of the workspace it gets saved to
 
 
@@ -375,7 +375,7 @@ workspace_name: the name of the workspace it gets saved to
 
 <pre>
 a reference to a hash where the following keys are defined:
-genome_ref has a value which is a kb_functional_enrichment_1.obj_ref
+feature_set_ref has a value which is a kb_functional_enrichment_1.obj_ref
 workspace_name has a value which is a string
 
 </pre>
@@ -385,7 +385,7 @@ workspace_name has a value which is a string
 =begin text
 
 a reference to a hash where the following keys are defined:
-genome_ref has a value which is a kb_functional_enrichment_1.obj_ref
+feature_set_ref has a value which is a kb_functional_enrichment_1.obj_ref
 workspace_name has a value which is a string
 
 
