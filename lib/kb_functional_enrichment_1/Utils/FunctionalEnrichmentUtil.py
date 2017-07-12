@@ -210,7 +210,7 @@ class FunctionalEnrichmentUtil:
         data.next()
         sortedlist = sorted(data, key=operator.itemgetter(5), reverse=True)
         for row in sortedlist[:50]:
-            enrichment_table += '<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>'.format(*row)
+            enrichment_table += '<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>'.format(*row)
 
         with open(result_file_path, 'w') as result_file:
             with open(os.path.join(os.path.dirname(__file__), 'report_template.html'),
