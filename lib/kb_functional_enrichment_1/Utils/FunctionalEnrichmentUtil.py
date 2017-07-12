@@ -9,6 +9,7 @@ import uuid
 import errno
 import csv
 import operator
+import zipfile
 
 from Workspace.WorkspaceClient import Workspace as Workspace
 from DataFileUtil.DataFileUtilClient import DataFileUtil
@@ -50,7 +51,8 @@ class FunctionalEnrichmentUtil:
             if p not in params:
                 raise ValueError('"{}" parameter is required, but missing'.format(p))
 
-    def _generate_report(self, enrichment_map, result_directory, workspace_name):
+    def _generate_report(self, enrichment_map, result_directory, workspace_name, 
+                         feature_id_go_id_list_map, feature_set_ids, genome_ref):
         """
         _generate_report: generate summary report
         """
@@ -58,7 +60,10 @@ class FunctionalEnrichmentUtil:
         log('start creating report')
 
         output_files = self._generate_output_file_list(result_directory,
-                                                       enrichment_map)
+                                                       enrichment_map,
+                                                       feature_id_go_id_list_map,
+                                                       feature_set_ids,
+                                                       genome_ref)
 
         output_html_files = self._generate_html_report(result_directory,
                                                        enrichment_map)
@@ -79,7 +84,81 @@ class FunctionalEnrichmentUtil:
 
         return report_output
 
-    def _generate_output_file_list(self, result_directory, enrichment_map):
+    def _generate_supporting_files(self, result_directory, enrichment_map, 
+                                   feature_id_go_id_list_map, feature_set_ids, genome_ref):
+        """
+        _generate_supporting_files: generate varies debug files 
+        """
+        supporting_files = list()
+
+        feature_id_go_ids_map_file = os.path.join(result_directory, 'feature_id_go_ids_map.txt')
+        go_id_feature_ids_map_file = os.path.join(result_directory, 'go_id_feature_ids_map.txt')
+        feature_ids_file = os.path.join(result_directory, 'feature_ids.txt')
+        feature_set_ids_file = os.path.join(result_directory, 'feature_set_ids.txt')
+        fisher_variables_file = os.path.join(result_directory, 'fisher_variables.txt')
+        genome_info_file = os.path.join(result_directory, 'genome_info.txt')
+
+        supporting_files.append(feature_id_go_ids_map_file)
+        supporting_files.append(go_id_feature_ids_map_file)
+        supporting_files.append(feature_ids_file)
+        supporting_files.append(feature_set_ids_file)
+        supporting_files.append(fisher_variables_file)
+        supporting_files.append(genome_info_file)
+
+        feature_ids = feature_id_go_id_list_map.keys()
+        genome_name = self.ws.get_object_info3({'objects': 
+                                                [{'ref': genome_ref}]})['infos'][0][1]
+
+        with open(genome_info_file, 'wb') as genome_info_file:
+            genome_info_file.write('genome_name: {}\n'.format(genome_name))
+            genome_info_file.write('features: {}\n'.format(len(feature_ids)))
+
+        with open(feature_set_ids_file, 'wb') as feature_set_ids_file:
+            feature_set_ids_file.write('\n'.join(feature_set_ids))
+
+        with open(feature_id_go_ids_map_file, 'wb') as feature_id_go_ids_map_file:
+            with open(feature_ids_file, 'wb') as feature_ids_file:
+                for feature_id, go_ids in feature_id_go_id_list_map.iteritems():
+                    if not re.match('.*\.\d*', feature_id):
+                        feature_ids_file.write('{} {}\n'.format(feature_id,
+                                                                feature_id in feature_set_ids))
+                        if isinstance(go_ids, str):
+                            feature_id_go_ids_map_file.write('{} {}\n'.format(feature_id, 
+                                                                              go_ids))
+                        else:
+                            feature_id_go_ids_map_file.write('{} {}\n'.format(feature_id, 
+                                                                              ','.join(go_ids)))
+
+        with open(go_id_feature_ids_map_file, 'wb') as go_id_feature_ids_map_file:
+            with open(fisher_variables_file, 'wb') as fisher_variables_file:
+                for go_id, go_info in enrichment_map.iteritems():
+                    mapped_features = go_info.get('mapped_features')
+                    go_id_feature_ids_map_file.write('{} {}\n'.format(go_id,
+                                                                      ','.join(mapped_features)))
+                    a_value = go_info.get('num_in_subset_feature_set')
+                    b_value = len(feature_set_ids) - a_value
+                    c_value = len(mapped_features) - a_value
+                    d_value = len(feature_ids) - len(feature_set_ids) - c_value
+                    p_value = go_info.get('raw_p_value')
+                    fisher_variables_file.write('{} a:{} b:{} c:{} d:{} p_value:{}\n'.format(go_id,
+                                                                                             a_value,
+                                                                                             b_value,
+                                                                                             c_value,
+                                                                                             d_value,
+                                                                                             p_value))
+        result_file = os.path.join(result_directory, 'supporting_files.zip')
+        with zipfile.ZipFile(result_file, 'w', zipfile.ZIP_DEFLATED, allowZip64=True) as zip_file:
+            for supporting_file in supporting_files:
+                zip_file.write(supporting_file, 
+                               os.path.basename(supporting_file))
+
+        return [{'path': result_file,
+                 'name': os.path.basename(result_file),
+                 'label': os.path.basename(result_file),
+                 'description': 'GO term functional enrichment supporting files'}]
+
+    def _generate_output_file_list(self, result_directory, enrichment_map, 
+                                   feature_id_go_id_list_map, feature_set_ids, genome_ref):
         """
         _generate_output_file_list: zip result files and generate file_links for report
         """
@@ -91,17 +170,25 @@ class FunctionalEnrichmentUtil:
         with open(result_file, 'wb') as csv_file:
             writer = csv.writer(csv_file)
             writer.writerow(['term_id', 'term', 'ontology', 'num_in_feature_set',
-                             'num_in_ref_genome', 'raw_p_value', 'adjusted_p_value'])
+                             'num_in_ref_genome', 'raw_p_value', 'adjusted_p_value', 
+                             'mapped_features'])
             for key, value in enrichment_map.iteritems():
                 writer.writerow([key, value['go_term'], value['namespace'],
                                  value['num_in_subset_feature_set'],
                                  value['num_in_ref_genome'], value['raw_p_value'],
-                                 value['adjusted_p_value']])
+                                 value['adjusted_p_value'], value['mapped_features']])
 
         output_files.append({'path': result_file,
                              'name': os.path.basename(result_file),
                              'label': os.path.basename(result_file),
                              'description': 'GO term functional enrichment'})
+
+        supporting_files = self._generate_supporting_files(result_directory, 
+                                                           enrichment_map, 
+                                                           feature_id_go_id_list_map,
+                                                           feature_set_ids,
+                                                           genome_ref)
+        output_files += supporting_files
 
         return output_files
 
@@ -186,6 +273,9 @@ class FunctionalEnrichmentUtil:
                         go_id_feature_id_list_map.update({go_id: feature_ids})
                     else:
                         go_id_feature_id_list_map.update({go_id: [feature_id]})
+            else:
+                if not re.match('.*\.\d*', feature_id):
+                    feature_id_go_id_list_map.update({feature_id: 'no_label'})
 
         return (feature_id_go_id_list_map, go_id_feature_id_list_map,
                 go_id_go_term_map, feature_id_feature_info_map)
@@ -252,7 +342,7 @@ class FunctionalEnrichmentUtil:
         (feature_id_go_id_list_map, go_id_feature_id_list_map,
          go_id_go_term_map, feature_id_feature_info_map) = self._get_go_maps_from_genome(genome_ref)
 
-        feature_ids = feature_id_feature_info_map.keys()
+        feature_ids = feature_id_go_id_list_map.keys()
 
         enrichment_map = {}
         go_info_map = {}
@@ -274,7 +364,8 @@ class FunctionalEnrichmentUtil:
             go_info_map.update({go_id: {'raw_p_value': raw_p_value,
                                         'num_in_ref_genome': len(mapped_features),
                                         'num_in_subset_feature_set': a,
-                                        'pos': pos}})
+                                        'pos': pos,
+                                        'mapped_features': mapped_features}})
             pos += 1
 
         stats = importr('stats')
@@ -298,12 +389,16 @@ class FunctionalEnrichmentUtil:
                                            'num_in_subset_feature_set': go_info.get(
                                                                     'num_in_subset_feature_set'),
                                            'go_term': go_id_go_term_map.get(go_id),
-                                           'namespace': namespace.split("_")[1][0].upper()}})
+                                           'namespace': namespace.split("_")[1][0].upper(),
+                                           'mapped_features': go_info.get('mapped_features')}})
 
         returnVal = {'result_directory': result_directory}
         report_output = self._generate_report(enrichment_map,
                                               result_directory,
-                                              params.get('workspace_name'))
+                                              params.get('workspace_name'),
+                                              feature_id_go_id_list_map,
+                                              feature_set_ids,
+                                              genome_ref)
 
         returnVal.update(report_output)
 
