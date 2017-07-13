@@ -170,13 +170,12 @@ class FunctionalEnrichmentUtil:
         with open(result_file, 'wb') as csv_file:
             writer = csv.writer(csv_file)
             writer.writerow(['term_id', 'term', 'ontology', 'num_in_feature_set',
-                             'num_in_ref_genome', 'raw_p_value', 'adjusted_p_value', 
-                             'mapped_features'])
+                             'num_in_ref_genome', 'raw_p_value', 'adjusted_p_value'])
             for key, value in enrichment_map.iteritems():
                 writer.writerow([key, value['go_term'], value['namespace'],
                                  value['num_in_subset_feature_set'],
                                  value['num_in_ref_genome'], value['raw_p_value'],
-                                 value['adjusted_p_value'], value['mapped_features']])
+                                 value['adjusted_p_value']])
 
         output_files.append({'path': result_file,
                              'name': os.path.basename(result_file),
@@ -359,7 +358,7 @@ class FunctionalEnrichmentUtil:
             # not in feature_set doesn't match go_id
             d = len(feature_ids) - len(feature_set_ids) - c
 
-            raw_p_value = fisher.pvalue(a, b, c, d).left_tail
+            raw_p_value = fisher.pvalue(a, b, c, d).two_tail
             all_raw_p_value.append(raw_p_value)
             go_info_map.update({go_id: {'raw_p_value': raw_p_value,
                                         'num_in_ref_genome': len(mapped_features),
