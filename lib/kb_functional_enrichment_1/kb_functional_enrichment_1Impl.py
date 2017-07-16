@@ -24,7 +24,7 @@ class kb_functional_enrichment_1:
     ######################################### noqa
     VERSION = "1.0.1"
     GIT_URL = "https://github.com/Tianhao-Gu/kb_functional_enrichment_1.git"
-    GIT_COMMIT_HASH = "e1c80e667fd42b29b97bf63f867d66358855fc4c"
+    GIT_COMMIT_HASH = "4450059c3fcea205cf37b17d329efe8c7ec35334"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
