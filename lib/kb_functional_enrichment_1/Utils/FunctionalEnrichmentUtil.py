@@ -52,7 +52,8 @@ class FunctionalEnrichmentUtil:
                 raise ValueError('"{}" parameter is required, but missing'.format(p))
 
     def _generate_report(self, enrichment_map, result_directory, workspace_name, 
-                         feature_id_go_id_list_map, feature_set_ids, genome_ref):
+                         feature_id_go_id_list_map, feature_set_ids, genome_ref, 
+                         go_id_parent_ids_map):
         """
         _generate_report: generate summary report
         """
@@ -63,19 +64,20 @@ class FunctionalEnrichmentUtil:
                                                        enrichment_map,
                                                        feature_id_go_id_list_map,
                                                        feature_set_ids,
-                                                       genome_ref)
+                                                       genome_ref,
+                                                       go_id_parent_ids_map)
 
         output_html_files = self._generate_html_report(result_directory,
                                                        enrichment_map)
 
-        report_params = {
-              'message': '',
-              'workspace_name': workspace_name,
-              'file_links': output_files,
-              'html_links': output_html_files,
-              'direct_html_link_index': 0,
-              'html_window_height': 333,
-              'report_object_name': 'kb_functional_enrichment_1_report_' + str(uuid.uuid4())}
+        report_object_name = 'kb_functional_enrichment_1_report_' + str(uuid.uuid4())
+        report_params = {'message': '',
+                         'workspace_name': workspace_name,
+                         'file_links': output_files,
+                         'html_links': output_html_files,
+                         'direct_html_link_index': 0,
+                         'html_window_height': 333,
+                         'report_object_name': report_object_name}
 
         kbase_report_client = KBaseReport(self.callback_url)
         output = kbase_report_client.create_extended_report(report_params)
@@ -85,7 +87,8 @@ class FunctionalEnrichmentUtil:
         return report_output
 
     def _generate_supporting_files(self, result_directory, enrichment_map, 
-                                   feature_id_go_id_list_map, feature_set_ids, genome_ref):
+                                   feature_id_go_id_list_map, feature_set_ids, genome_ref,
+                                   go_id_parent_ids_map):
         """
         _generate_supporting_files: generate varies debug files 
         """
@@ -97,6 +100,7 @@ class FunctionalEnrichmentUtil:
         feature_set_ids_file = os.path.join(result_directory, 'feature_set_ids.txt')
         fisher_variables_file = os.path.join(result_directory, 'fisher_variables.txt')
         genome_info_file = os.path.join(result_directory, 'genome_info.txt')
+        go_id_parent_ids_map_file = os.path.join(result_directory, 'go_id_parent_ids_map.txt')
 
         supporting_files.append(feature_id_go_ids_map_file)
         supporting_files.append(go_id_feature_ids_map_file)
@@ -104,10 +108,15 @@ class FunctionalEnrichmentUtil:
         supporting_files.append(feature_set_ids_file)
         supporting_files.append(fisher_variables_file)
         supporting_files.append(genome_info_file)
+        supporting_files.append(go_id_parent_ids_map_file)
 
         feature_ids = feature_id_go_id_list_map.keys()
         genome_name = self.ws.get_object_info3({'objects': 
                                                 [{'ref': genome_ref}]})['infos'][0][1]
+
+        with open(go_id_parent_ids_map_file, 'wb') as go_id_parent_ids_map_file:
+            for go_id, parent_ids in go_id_parent_ids_map.iteritems():
+                go_id_parent_ids_map_file.write('{}: {}\n'.format(go_id, ', '.join(parent_ids)))
 
         with open(genome_info_file, 'wb') as genome_info_file:
             genome_info_file.write('genome_name: {}\n'.format(genome_name))
@@ -127,25 +136,26 @@ class FunctionalEnrichmentUtil:
                                                                               go_ids))
                         else:
                             feature_id_go_ids_map_file.write('{} {}\n'.format(feature_id, 
-                                                                              ','.join(go_ids)))
+                                                                              ', '.join(go_ids)))
 
         with open(go_id_feature_ids_map_file, 'wb') as go_id_feature_ids_map_file:
             with open(fisher_variables_file, 'wb') as fisher_variables_file:
                 for go_id, go_info in enrichment_map.iteritems():
                     mapped_features = go_info.get('mapped_features')
                     go_id_feature_ids_map_file.write('{} {}\n'.format(go_id,
-                                                                      ','.join(mapped_features)))
+                                                                      ', '.join(mapped_features)))
                     a_value = go_info.get('num_in_subset_feature_set')
                     b_value = len(feature_set_ids) - a_value
                     c_value = len(mapped_features) - a_value
                     d_value = len(feature_ids) - len(feature_set_ids) - c_value
                     p_value = go_info.get('raw_p_value')
-                    fisher_variables_file.write('{} a:{} b:{} c:{} d:{} p_value:{}\n'.format(go_id,
-                                                                                             a_value,
-                                                                                             b_value,
-                                                                                             c_value,
-                                                                                             d_value,
-                                                                                             p_value))
+                    fisher_variables_file.write('{} a:{} b:{} c:{} d:{} '.format(go_id,
+                                                                                 a_value,
+                                                                                 b_value,
+                                                                                 c_value,
+                                                                                 d_value))
+                    fisher_variables_file.write('p_value:{}\n'.format(p_value))
+
         result_file = os.path.join(result_directory, 'supporting_files.zip')
         with zipfile.ZipFile(result_file, 'w', zipfile.ZIP_DEFLATED, allowZip64=True) as zip_file:
             for supporting_file in supporting_files:
@@ -158,7 +168,8 @@ class FunctionalEnrichmentUtil:
                  'description': 'GO term functional enrichment supporting files'}]
 
     def _generate_output_file_list(self, result_directory, enrichment_map, 
-                                   feature_id_go_id_list_map, feature_set_ids, genome_ref):
+                                   feature_id_go_id_list_map, feature_set_ids, genome_ref,
+                                   go_id_parent_ids_map):
         """
         _generate_output_file_list: zip result files and generate file_links for report
         """
@@ -186,7 +197,8 @@ class FunctionalEnrichmentUtil:
                                                            enrichment_map, 
                                                            feature_id_go_id_list_map,
                                                            feature_set_ids,
-                                                           genome_ref)
+                                                           genome_ref,
+                                                           go_id_parent_ids_map)
         output_files += supporting_files
 
         return output_files
@@ -300,10 +312,87 @@ class FunctionalEnrichmentUtil:
             genome_ref_array += genome_refs
 
         if len(set(genome_ref_array)) > 1:
-            raise ValueError('FeatureSet has multiple reference Genomes: {}'.format(
-                                                                                genome_ref_array))
+            error_msg = 'FeatureSet has multiple reference Genomes: {}'.format(genome_ref_array)
+            raise ValueError(error_msg)
 
         return feature_set_ids, genome_ref_array[0]
+
+    def _get_immediate_parents(self, ontology_hash, go_id, 
+                               is_a_relationship, regulates_relationship, part_of_relationship):
+        """
+        _get_immediate_parents: get immediate parents go_ids for a given go_id
+        """
+        parent_ids = []
+        antology_info = ontology_hash.get(go_id)
+
+        if is_a_relationship:
+            is_a_parents = antology_info.get('is_a')
+            if is_a_parents:
+                for parent_string in is_a_parents:
+                    is_a_parent_id = parent_string.split('!')[0][:-1]
+                    parent_ids.append(is_a_parent_id)
+
+        if regulates_relationship:
+            relationship = antology_info.get('relationship')
+            if relationship:
+                for relationship_string in relationship:
+                    if relationship_string.split(' ')[0] == 'regulates':
+                        parent_ids.append(relationship_string.split(' ')[1])
+
+        if part_of_relationship:
+            relationship = antology_info.get('relationship')
+            if relationship:
+                for relationship_string in relationship:
+                    if relationship_string.split(' ')[0] == 'part_of':
+                        parent_ids.append(relationship_string.split(' ')[1])
+
+        return parent_ids
+
+    def _fetch_all_parents_go_ids(self, ontology_hash, go_id, 
+                                  is_a_relationship, regulates_relationship, part_of_relationship):
+        """
+        _fetch_all_parents_go_ids: recusively fetch all parent go_ids
+        """
+
+        parent_ids = self._get_immediate_parents(ontology_hash, go_id, 
+                                                 is_a_relationship, regulates_relationship, 
+                                                 part_of_relationship)
+        if parent_ids:
+            grand_parent_ids = parent_ids
+            for parent_id in parent_ids:
+                grand_parent_ids += self._fetch_all_parents_go_ids(ontology_hash, parent_id, 
+                                                                   is_a_relationship, 
+                                                                   regulates_relationship, 
+                                                                   part_of_relationship)[parent_id]
+            return {go_id: list(set(grand_parent_ids))}
+        else:
+            return {go_id: []}
+
+    def _generate_parent_child_map(self, ontology_hash, go_ids, 
+                                   is_a_relationship=True,
+                                   regulates_relationship=True,
+                                   part_of_relationship=False):
+        """
+        _generate_parent_child_map: fetch parent go_ids for given go_id
+        """
+
+        log('start fetching parent go_ids')
+        start = time.time()
+
+        go_id_parent_ids_map = {}
+        
+        for go_id in go_ids:
+            fetch_result = self._fetch_all_parents_go_ids(ontology_hash, go_id, 
+                                                          is_a_relationship, 
+                                                          regulates_relationship, 
+                                                          part_of_relationship)
+
+            go_id_parent_ids_map.update(fetch_result) 
+
+        end = time.time()
+        print 'used {:.2f} s'.format(end - start)
+
+        return go_id_parent_ids_map
 
     def __init__(self, config):
         self.ws_url = config['workspace-url']
@@ -338,11 +427,40 @@ class FunctionalEnrichmentUtil:
 
         feature_set_ids, genome_ref = self._process_feature_set(params.get('feature_set_ref'))
 
-        (feature_id_go_id_list_map, go_id_feature_id_list_map,
-         go_id_go_term_map, feature_id_feature_info_map) = self._get_go_maps_from_genome(genome_ref)
+        (feature_id_go_id_list_map, 
+         go_id_feature_id_list_map,
+         go_id_go_term_map, 
+         feature_id_feature_info_map) = self._get_go_maps_from_genome(genome_ref)
 
         feature_ids = feature_id_go_id_list_map.keys()
 
+        ontology_hash = dict()
+        ontologies = self.ws.get_objects([{'workspace': 'KBaseOntology',
+                                           'name': 'gene_ontology'},
+                                          {'workspace': 'KBaseOntology',
+                                           'name': 'plant_ontology'}])
+        ontology_hash.update(ontologies[0]['data']['term_hash'])
+        ontology_hash.update(ontologies[1]['data']['term_hash'])
+
+        go_id_parent_ids_map = self._generate_parent_child_map(ontology_hash, 
+                                                               go_id_go_term_map.keys())
+
+        log('including parents to feature id map')
+        for go_id, parent_ids in go_id_parent_ids_map.iteritems():
+            mapped_features = go_id_feature_id_list_map.get(go_id)
+
+            for parent_id in parent_ids:
+                parent_mapped_features = go_id_feature_id_list_map.get(parent_id)
+
+                if not parent_mapped_features:
+                    parent_mapped_features = []
+
+                if mapped_features:
+                    parent_mapped_features += mapped_features
+
+                go_id_feature_id_list_map.update({parent_id: list(set(parent_mapped_features))})
+
+        log('start calculating p-values')
         enrichment_map = {}
         go_info_map = {}
         all_raw_p_value = []
@@ -370,23 +488,14 @@ class FunctionalEnrichmentUtil:
         stats = importr('stats')
         adjusted_p_values = stats.p_adjust(FloatVector(all_raw_p_value), method='fdr')
 
-        ontologies = self.ws.get_objects([{'workspace': 'KBaseOntology',
-                                           'name': 'gene_ontology'},
-                                          {'workspace': 'KBaseOntology',
-                                           'name': 'plant_ontology'}])
-
-        ontology_hash = dict()
-        ontology_hash.update(ontologies[0]['data']['term_hash'])
-        ontology_hash.update(ontologies[1]['data']['term_hash'])
-
         for go_id, go_info in go_info_map.iteritems():
             adjusted_p_value = adjusted_p_values[go_info.get('pos')]
             namespace = ontology_hash[go_id]['namespace']
             enrichment_map.update({go_id: {'raw_p_value': go_info.get('raw_p_value'),
                                            'adjusted_p_value': adjusted_p_value,
                                            'num_in_ref_genome': go_info.get('num_in_ref_genome'),
-                                           'num_in_subset_feature_set': go_info.get(
-                                                                    'num_in_subset_feature_set'),
+                                           'num_in_subset_feature_set': 
+                                           go_info.get('num_in_subset_feature_set'),
                                            'go_term': go_id_go_term_map.get(go_id),
                                            'namespace': namespace.split("_")[1][0].upper(),
                                            'mapped_features': go_info.get('mapped_features')}})
@@ -397,7 +506,8 @@ class FunctionalEnrichmentUtil:
                                               params.get('workspace_name'),
                                               feature_id_go_id_list_map,
                                               feature_set_ids,
-                                              genome_ref)
+                                              genome_ref,
+                                              go_id_parent_ids_map)
 
         returnVal.update(report_output)
 
