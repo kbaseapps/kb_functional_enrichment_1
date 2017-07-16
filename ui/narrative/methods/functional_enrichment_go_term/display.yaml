@@ -1,7 +1,7 @@
 #
 # Define basic display information
 #
-name     : Functional Enrichment For GO Term - v1.0.0
+name     : Functional Enrichment For GO Term - v1.0.1
 
 tooltip  : |
     Create GO term enrichment from feature set and reference genome
