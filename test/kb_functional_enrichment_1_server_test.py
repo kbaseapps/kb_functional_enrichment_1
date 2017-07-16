@@ -96,11 +96,9 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
 
         save_object_params = {
             'id': cls.dfu.ws_name_to_id(cls.wsName),
-            'objects': [{
-                            'type': 'KBaseCollections.FeatureSet',
-                            'data': test_feature_set_data,
-                            'name': test_feature_set_name
-                        }]
+            'objects': [{'type': 'KBaseCollections.FeatureSet',
+                         'data': test_feature_set_data,
+                         'name': test_feature_set_name}]
         }
 
         dfu_oi = cls.dfu.save_objects(save_object_params)[0]
@@ -119,20 +117,16 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
         return self.__class__.ctx
 
     def test_bad_run_fe1_params(self):
-        invalidate_input_params = {
-          'missing_feature_set_ref': 'feature_set_ref',
-          'workspace_name': 'workspace_name'
-        }
-        with self.assertRaisesRegexp(
-                    ValueError, '"feature_set_ref" parameter is required, but missing'):
+        invalidate_input_params = {'missing_feature_set_ref': 'feature_set_ref',
+                                   'workspace_name': 'workspace_name'}
+        with self.assertRaisesRegexp(ValueError, 
+                                     '"feature_set_ref" parameter is required, but missing'):
             self.getImpl().run_fe1(self.getContext(), invalidate_input_params)
 
-        invalidate_input_params = {
-          'feature_set_ref': 'feature_set_ref',
-          'missing_workspace_name': 'workspace_name'
-        }
-        with self.assertRaisesRegexp(
-                    ValueError, '"workspace_name" parameter is required, but missing'):
+        invalidate_input_params = {'feature_set_ref': 'feature_set_ref',
+                                   'missing_workspace_name': 'workspace_name'}
+        with self.assertRaisesRegexp(ValueError, 
+                                     '"workspace_name" parameter is required, but missing'):
             self.getImpl().run_fe1(self.getContext(), invalidate_input_params)
 
     def test_run_fe1(self):
@@ -150,7 +144,8 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
         expect_result_files = ['functional_enrichment.csv']
         self.assertTrue(all(x in result_files for x in expect_result_files))
 
-        with open(os.path.join(result['result_directory'], 'functional_enrichment.csv'), 'rb') as f:
+        with open(os.path.join(result['result_directory'], 
+                  'functional_enrichment.csv'), 'rb') as f:
             reader = csv.reader(f)
             header = reader.next()
             expected_header = ['term_id', 'term', 'ontology', 'num_in_feature_set',
