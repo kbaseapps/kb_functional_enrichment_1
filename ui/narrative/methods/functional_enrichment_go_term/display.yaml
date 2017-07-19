@@ -29,5 +29,16 @@ parameters :
     short-hint : |
       Feature Set Object
 
+  propagation :
+    ui-name : |
+      Propagation
+    short-hint : |
+      Include parent-child relationship to go terms 
+
+  filter_ref_features :
+    ui-name : |
+      Filter Reference Genome Features
+    short-hint : |
+      Filter reference genome features with no go terms
 description : |
     <p></p>
