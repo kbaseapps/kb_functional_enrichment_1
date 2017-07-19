@@ -134,7 +134,7 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
         input_params = {
             'feature_set_ref': self.feature_set_ref,
             'workspace_name': self.getWsName(),
-            'propagation': 1,
+            'propagation': 0,
             'filter_ref_features': 1
         }
 
