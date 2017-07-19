@@ -53,7 +53,7 @@ class FunctionalEnrichmentUtil:
 
     def _generate_report(self, enrichment_map, result_directory, workspace_name, 
                          feature_id_go_id_list_map, feature_set_ids, genome_ref, 
-                         go_id_parent_ids_map):
+                         go_id_parent_ids_map, feature_ids):
         """
         _generate_report: generate summary report
         """
@@ -65,7 +65,8 @@ class FunctionalEnrichmentUtil:
                                                        feature_id_go_id_list_map,
                                                        feature_set_ids,
                                                        genome_ref,
-                                                       go_id_parent_ids_map)
+                                                       go_id_parent_ids_map,
+                                                       feature_ids)
 
         output_html_files = self._generate_html_report(result_directory,
                                                        enrichment_map)
@@ -88,7 +89,7 @@ class FunctionalEnrichmentUtil:
 
     def _generate_supporting_files(self, result_directory, enrichment_map, 
                                    feature_id_go_id_list_map, feature_set_ids, genome_ref,
-                                   go_id_parent_ids_map):
+                                   go_id_parent_ids_map, feature_ids):
         """
         _generate_supporting_files: generate varies debug files 
         """
@@ -110,7 +111,7 @@ class FunctionalEnrichmentUtil:
         supporting_files.append(genome_info_file)
         supporting_files.append(go_id_parent_ids_map_file)
 
-        feature_ids = feature_id_go_id_list_map.keys()
+        total_feature_ids = feature_id_go_id_list_map.keys()
         feature_ids_with_feature = []
         for feature_id, go_ids in feature_id_go_id_list_map.iteritems():
             if isinstance(go_ids, list):
@@ -124,7 +125,7 @@ class FunctionalEnrichmentUtil:
 
         with open(genome_info_file, 'wb') as genome_info_file:
             genome_info_file.write('genome_name: {}\n'.format(genome_name))
-            genome_info_file.write('features: {}\n'.format(len(feature_ids)))
+            genome_info_file.write('features: {}\n'.format(len(total_feature_ids)))
             genome_info_file.write('features with term: {}'.format(len(feature_ids_with_feature)))
 
         with open(feature_set_ids_file, 'wb') as feature_set_ids_file:
@@ -174,7 +175,7 @@ class FunctionalEnrichmentUtil:
 
     def _generate_output_file_list(self, result_directory, enrichment_map, 
                                    feature_id_go_id_list_map, feature_set_ids, genome_ref,
-                                   go_id_parent_ids_map):
+                                   go_id_parent_ids_map, feature_ids):
         """
         _generate_output_file_list: zip result files and generate file_links for report
         """
@@ -203,7 +204,8 @@ class FunctionalEnrichmentUtil:
                                                            feature_id_go_id_list_map,
                                                            feature_set_ids,
                                                            genome_ref,
-                                                           go_id_parent_ids_map)
+                                                           go_id_parent_ids_map,
+                                                           feature_ids)
         output_files += supporting_files
 
         return output_files
@@ -449,12 +451,16 @@ class FunctionalEnrichmentUtil:
          feature_id_feature_info_map) = self._get_go_maps_from_genome(genome_ref)
 
         if filter_ref_features:
+            log('start filtering featrues with no term')
             feature_ids = []
             for feature_id, go_ids in feature_id_go_id_list_map.iteritems():
                 if isinstance(go_ids, list):
                     feature_ids.append(feature_id)
         else:
             feature_ids = feature_id_go_id_list_map.keys()
+
+        print 'fdsafds'
+        print len(feature_ids)
 
         ontology_hash = dict()
         ontologies = self.ws.get_objects([{'workspace': 'KBaseOntology',
@@ -535,7 +541,8 @@ class FunctionalEnrichmentUtil:
                                               feature_id_go_id_list_map,
                                               feature_set_ids,
                                               genome_ref,
-                                              go_id_parent_ids_map)
+                                              go_id_parent_ids_map,
+                                              feature_ids)
 
         returnVal.update(report_output)
 
