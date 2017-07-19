@@ -8,7 +8,6 @@ import os
 import uuid
 import errno
 import csv
-import operator
 import zipfile
 
 from Workspace.WorkspaceClient import Workspace as Workspace
@@ -223,17 +222,15 @@ class FunctionalEnrichmentUtil:
         result_file_path = os.path.join(output_directory, 'report.html')
 
         enrichment_table = ''
-        data = csv.reader(open(os.path.join(result_directory, 'functional_enrichment.csv')),
-                          delimiter=',')
-        data.next()
-        sortedlist = sorted(data, key=operator.itemgetter(5), reverse=True)
-        count = 0
+        data = csv.DictReader(open(os.path.join(result_directory, 'functional_enrichment.csv')), 
+                              delimiter=',')
+        sortedlist = sorted(data, key=lambda row: (row['raw_p_value'],
+                                                   row['num_in_ref_genome']), 
+                            reverse=True)
+
         for row in sortedlist:
-            if row[3] != '0':
+            if row['num_in_feature_set'] != '0':
                 enrichment_table += '<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>'.format(*row)
-                count += 1
-                if count == 49:
-                    break
 
         with open(result_file_path, 'w') as result_file:
             with open(os.path.join(os.path.dirname(__file__), 'report_template.html'),
@@ -458,9 +455,6 @@ class FunctionalEnrichmentUtil:
                     feature_ids.append(feature_id)
         else:
             feature_ids = feature_id_go_id_list_map.keys()
-
-        print 'fdsafds'
-        print len(feature_ids)
 
         ontology_hash = dict()
         ontologies = self.ws.get_objects([{'workspace': 'KBaseOntology',
