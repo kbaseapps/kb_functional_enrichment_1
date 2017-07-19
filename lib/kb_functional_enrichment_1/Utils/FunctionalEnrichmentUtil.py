@@ -230,7 +230,13 @@ class FunctionalEnrichmentUtil:
 
         for row in sortedlist:
             if row['num_in_feature_set'] != '0':
-                enrichment_table += '<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>'.format(*row.values())
+                enrichment_table += '<tr><td>{}</td>'.format(row['term_id'])
+                enrichment_table += '<td>{}</td>'.format(row['term'])
+                enrichment_table += '<td>{}</td>'.format(row['ontology'])
+                enrichment_table += '<td>{}</td>'.format(row['num_in_feature_set'])
+                enrichment_table += '<td>{}</td>'.format(row['num_in_ref_genome'])
+                enrichment_table += '<td>{}</td>'.format(row['raw_p_value'])
+                enrichment_table += '<td>{}</td>/tr>'.format(row['adjusted_p_value'])
 
         with open(result_file_path, 'w') as result_file:
             with open(os.path.join(os.path.dirname(__file__), 'report_template.html'),
