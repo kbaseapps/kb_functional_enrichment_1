@@ -16,10 +16,16 @@ module kb_functional_enrichment_1 {
       required params:
       feature_set_ref: FeatureSet object reference
       workspace_name: the name of the workspace it gets saved to
+
+      optional params:
+      propagation: includes is_a relationship to all go terms (default is 1)
+      filter_ref_features: filter reference genome features with no go terms (default is 0)
     */
     typedef structure{
         obj_ref feature_set_ref;
         string workspace_name;
+        boolean propagation;
+        boolean filter_ref_features;
     } FEOneInput;
 
     /*

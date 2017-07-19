@@ -124,7 +124,10 @@ $returnVal is a kb_functional_enrichment_1.FEOneResult
 FEOneInput is a reference to a hash where the following keys are defined:
 	feature_set_ref has a value which is a kb_functional_enrichment_1.obj_ref
 	workspace_name has a value which is a string
+	propagation has a value which is a kb_functional_enrichment_1.boolean
+	filter_ref_features has a value which is a kb_functional_enrichment_1.boolean
 obj_ref is a string
+boolean is an int
 FEOneResult is a reference to a hash where the following keys are defined:
 	result_directory has a value which is a string
 	report_name has a value which is a string
@@ -141,7 +144,10 @@ $returnVal is a kb_functional_enrichment_1.FEOneResult
 FEOneInput is a reference to a hash where the following keys are defined:
 	feature_set_ref has a value which is a kb_functional_enrichment_1.obj_ref
 	workspace_name has a value which is a string
+	propagation has a value which is a kb_functional_enrichment_1.boolean
+	filter_ref_features has a value which is a kb_functional_enrichment_1.boolean
 obj_ref is a string
+boolean is an int
 FEOneResult is a reference to a hash where the following keys are defined:
 	result_directory has a value which is a string
 	report_name has a value which is a string
@@ -368,6 +374,10 @@ required params:
 feature_set_ref: FeatureSet object reference
 workspace_name: the name of the workspace it gets saved to
 
+optional params:
+propagation: includes is_a relationship to all go terms (default is 1)
+filter_ref_features: filter reference genome features with no go terms (default is 0)
+
 
 =item Definition
 
@@ -377,6 +387,8 @@ workspace_name: the name of the workspace it gets saved to
 a reference to a hash where the following keys are defined:
 feature_set_ref has a value which is a kb_functional_enrichment_1.obj_ref
 workspace_name has a value which is a string
+propagation has a value which is a kb_functional_enrichment_1.boolean
+filter_ref_features has a value which is a kb_functional_enrichment_1.boolean
 
 </pre>
 
@@ -387,6 +399,8 @@ workspace_name has a value which is a string
 a reference to a hash where the following keys are defined:
 feature_set_ref has a value which is a kb_functional_enrichment_1.obj_ref
 workspace_name has a value which is a string
+propagation has a value which is a kb_functional_enrichment_1.boolean
+filter_ref_features has a value which is a kb_functional_enrichment_1.boolean
 
 
 =end text

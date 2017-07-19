@@ -18,6 +18,30 @@
     "text_options" : {
       "valid_ws_types" : ["KBaseCollections.FeatureSet"]
     }
+  },
+  {
+    "id": "propagation",
+    "optional":true,
+    "advanced":false,
+    "allow_multiple":false,
+    "default_values":["1"],
+    "field_type" : "checkbox",
+    "checkbox_options":{
+        "checked_value": 1,
+        "unchecked_value": 0
+    }
+  },
+  {
+    "id": "filter_ref_features",
+    "optional":true,
+    "advanced":false,
+    "allow_multiple":false,
+    "default_values":["0"],
+    "field_type" : "checkbox",
+    "checkbox_options":{
+        "checked_value": 1,
+        "unchecked_value": 0
+    }
   }],
   "behavior" : {
     "service-mapping" : {
@@ -33,6 +57,14 @@
           "input_parameter" : "feature_set_ref",
           "target_type_transform": "resolved-ref",
           "target_property" : "feature_set_ref"
+        },
+        {
+            "input_parameter" : "propagation",
+            "target_property" : "propagation"
+        },
+        {
+            "input_parameter" : "filter_ref_features",
+            "target_property" : "filter_ref_features"
         }],
       "output_mapping" : [
         {
