@@ -1,9 +1,9 @@
 {
   "ver" : "1.0.0",
-  "authors" : [ ],
+  "authors" : ["tgu2"],
   "contact" : "help@kbase.us",
   "visible" : true,
-  "categories" : ["active"],
+  "categories" : ["active","expression","assembly"],
   "widgets" : {
     "input" : "kbaseNarrativeMethodInput",
     "output" : "no-display"

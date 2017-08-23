@@ -224,8 +224,8 @@ class FunctionalEnrichmentUtil:
         enrichment_table = ''
         data = csv.DictReader(open(os.path.join(result_directory, 'functional_enrichment.csv')), 
                               delimiter=',')
-        sortedlist = sorted(data, key=lambda row: (row['raw_p_value'],
-                                                   row['num_in_ref_genome']), 
+        sortedlist = sorted(data, key=lambda row: (float(row['raw_p_value']),
+                                                   float(row['num_in_ref_genome'])), 
                             reverse=True)
 
         for row in sortedlist:
