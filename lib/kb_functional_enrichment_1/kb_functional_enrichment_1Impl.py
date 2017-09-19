@@ -22,9 +22,9 @@ class kb_functional_enrichment_1:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "1.0.2"
+    VERSION = "1.0.3"
     GIT_URL = "https://github.com/Tianhao-Gu/kb_functional_enrichment_1.git"
-    GIT_COMMIT_HASH = "4e98511966d034f9908802a55b111b7bff6d1176"
+    GIT_COMMIT_HASH = "c45d8fa80e7ee4e237295a1142545f788c406863"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
