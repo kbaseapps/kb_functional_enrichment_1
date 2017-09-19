@@ -30,12 +30,12 @@ RUN pip install cffi --upgrade \
     && pip install pyasn1 --upgrade \
     && pip install requests --upgrade \
     && pip install fisher --upgrade \
-    && pip install rpy2 --upgrade \
     && pip install 'requests[security]' --upgrade
 
 # -----------------------------------------
 
-
+# most recent rpy2 no longer support python2.7
+RUN pip install rpy2==2.8.3
 
 COPY ./ /kb/module
 RUN mkdir -p /kb/module/work
