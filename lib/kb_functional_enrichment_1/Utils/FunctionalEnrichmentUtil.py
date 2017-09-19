@@ -95,7 +95,10 @@ class FunctionalEnrichmentUtil:
         supporting_files = list()
 
         feature_id_go_ids_map_file = os.path.join(result_directory, 'feature_id_go_ids_map.txt')
-        go_id_feature_ids_map_file = os.path.join(result_directory, 'go_id_feature_ids_map.txt')
+        go_id_genome_feature_ids_map_file = os.path.join(result_directory, 
+                                                         'go_id_genome_feature_ids_map.txt')
+        go_id_set_feature_ids_map_file = os.path.join(result_directory, 
+                                                      'go_id_feature_set_feature_ids_map.txt')
         feature_ids_file = os.path.join(result_directory, 'feature_ids.txt')
         feature_set_ids_file = os.path.join(result_directory, 'feature_set_ids.txt')
         fisher_variables_file = os.path.join(result_directory, 'fisher_variables.txt')
@@ -103,12 +106,13 @@ class FunctionalEnrichmentUtil:
         go_id_parent_ids_map_file = os.path.join(result_directory, 'go_id_parent_ids_map.txt')
 
         supporting_files.append(feature_id_go_ids_map_file)
-        supporting_files.append(go_id_feature_ids_map_file)
+        supporting_files.append(go_id_genome_feature_ids_map_file)
         supporting_files.append(feature_ids_file)
         supporting_files.append(feature_set_ids_file)
         supporting_files.append(fisher_variables_file)
         supporting_files.append(genome_info_file)
         supporting_files.append(go_id_parent_ids_map_file)
+        supporting_files.append(go_id_set_feature_ids_map_file)
 
         total_feature_ids = feature_id_go_id_list_map.keys()
         feature_ids_with_feature = []
@@ -143,23 +147,29 @@ class FunctionalEnrichmentUtil:
                             feature_id_go_ids_map_file.write('{} {}\n'.format(feature_id, 
                                                                               ', '.join(go_ids)))
 
-        with open(go_id_feature_ids_map_file, 'wb') as go_id_feature_ids_map_file:
-            with open(fisher_variables_file, 'wb') as fisher_variables_file:
-                for go_id, go_info in enrichment_map.iteritems():
-                    mapped_features = go_info.get('mapped_features')
-                    go_id_feature_ids_map_file.write('{} {}\n'.format(go_id,
-                                                                      ', '.join(mapped_features)))
-                    a_value = go_info.get('num_in_subset_feature_set')
-                    b_value = len(feature_set_ids) - a_value
-                    c_value = len(mapped_features) - a_value
-                    d_value = len(feature_ids) - len(feature_set_ids) - c_value
-                    p_value = go_info.get('raw_p_value')
-                    fisher_variables_file.write('{} a:{} b:{} c:{} d:{} '.format(go_id,
-                                                                                 a_value,
-                                                                                 b_value,
-                                                                                 c_value,
-                                                                                 d_value))
-                    fisher_variables_file.write('p_value:{}\n'.format(p_value))
+        with open(go_id_genome_feature_ids_map_file, 'wb') as go_id_genome_feature_ids_map_file:
+            with open(go_id_set_feature_ids_map_file, 'wb') as go_id_set_feature_ids_map_file:
+                with open(fisher_variables_file, 'wb') as fisher_variables_file:
+                    for go_id, go_info in enrichment_map.iteritems():
+                        mapped_features = go_info.get('mapped_features')
+                        fs_mapped_features = list(set(mapped_features).intersection(feature_set_ids))
+                        mapped_features_line = '{}: {}\n'.format(go_id, ', '.join(mapped_features))
+                        go_id_genome_feature_ids_map_file.write(mapped_features_line)
+
+                        set_mapped_features_line = '{}: {}\n'.format(go_id,
+                                                                     ', '.join(fs_mapped_features))
+                        go_id_set_feature_ids_map_file.write(set_mapped_features_line)
+                        a_value = go_info.get('num_in_subset_feature_set')
+                        b_value = len(feature_set_ids) - a_value
+                        c_value = len(mapped_features) - a_value
+                        d_value = len(feature_ids) - len(feature_set_ids) - c_value
+                        p_value = go_info.get('raw_p_value')
+                        fisher_variables_file.write('{} a:{} b:{} c:{} d:{} '.format(go_id,
+                                                                                     a_value,
+                                                                                     b_value,
+                                                                                     c_value,
+                                                                                     d_value))
+                        fisher_variables_file.write('p_value:{}\n'.format(p_value))
 
         result_file = os.path.join(result_directory, 'supporting_files.zip')
         with zipfile.ZipFile(result_file, 'w', zipfile.ZIP_DEFLATED, allowZip64=True) as zip_file:
