@@ -137,14 +137,14 @@ class FunctionalEnrichmentUtil:
         with open(feature_id_go_ids_map_file, 'wb') as feature_id_go_ids_map_file:
             with open(feature_ids_file, 'wb') as feature_ids_file:
                 for feature_id, go_ids in feature_id_go_id_list_map.iteritems():
-                    if not re.match('.*\.\d*', feature_id):
-                        feature_ids_file.write('{} {}\n'.format(feature_id,
-                                                                feature_id in feature_set_ids))
-                        if isinstance(go_ids, str):
-                            feature_id_go_ids_map_file.write('{} {}\n'.format(feature_id, 
+                    #if not re.match('.*\.\d*', feature_id):
+                    feature_ids_file.write('{} {}\n'.format(feature_id,
+                                                            feature_id in feature_set_ids))
+                    if isinstance(go_ids, str):
+                        feature_id_go_ids_map_file.write('{} {}\n'.format(feature_id, 
                                                                               go_ids))
-                        else:
-                            feature_id_go_ids_map_file.write('{} {}\n'.format(feature_id, 
+                    else:
+                        feature_id_go_ids_map_file.write('{} {}\n'.format(feature_id, 
                                                                               ', '.join(go_ids)))
 
         with open(go_id_genome_feature_ids_map_file, 'wb') as go_id_genome_feature_ids_map_file:
@@ -310,8 +310,8 @@ class FunctionalEnrichmentUtil:
                     else:
                         go_id_feature_id_list_map.update({go_id: [feature_id]})
             else:
-                if not re.match('.*\.\d*', feature_id):
-                    feature_id_go_id_list_map.update({feature_id: 'Unlabeled'})
+                #if not re.match('.*\.\d*', feature_id):
+                feature_id_go_id_list_map.update({feature_id: 'Unlabeled'})
 
         return (feature_id_go_id_list_map, go_id_feature_id_list_map,
                 go_id_go_term_map, feature_id_feature_info_map)
