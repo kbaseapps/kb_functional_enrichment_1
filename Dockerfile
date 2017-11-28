@@ -25,7 +25,6 @@ RUN CODENAME=`grep CODENAME /etc/lsb-release | cut -c 18-` && \
 
 # update security libraries in the base image
 RUN pip install cffi --upgrade \
-    && pip install pyopenssl --upgrade \
     && pip install ndg-httpsclient --upgrade \
     && pip install pyasn1 --upgrade \
     && pip install requests --upgrade \
