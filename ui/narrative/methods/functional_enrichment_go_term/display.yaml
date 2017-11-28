@@ -3,6 +3,8 @@
 #
 name     : Functional Enrichment For GO Term - v1.0.3
 
+icon: kb-purple.png
+
 tooltip  : |
     Create GO term enrichment from feature set and reference genome
 screenshots :
