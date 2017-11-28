@@ -7,3 +7,5 @@
 1.0.3: update rpy2 install due to lastest version no longer support python 2.7
 
 1.0.5: fix supporting file generation logic
+
+1.0.6: added icon
