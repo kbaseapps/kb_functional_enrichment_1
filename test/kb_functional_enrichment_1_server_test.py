@@ -63,7 +63,7 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
         cls.ws = Workspace(cls.wsURL, token=token)
 
         suffix = int(time.time() * 1000)
-        cls.wsName = "test_kb_stringtie_" + str(suffix)
+        cls.wsName = "test_kb_functional_enrichment_1_" + str(suffix)
         cls.wsClient.create_workspace({'workspace': cls.wsName})
 
         cls.prepare_data()
@@ -142,7 +142,7 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
 
         self.assertTrue('result_directory' in result)
         result_files = os.listdir(result['result_directory'])
-        print result_files
+        print(result_files)
         expect_result_files = ['functional_enrichment.csv']
         self.assertTrue(all(x in result_files for x in expect_result_files))
 
