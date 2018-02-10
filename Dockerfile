@@ -23,19 +23,16 @@ RUN CODENAME=`grep CODENAME /etc/lsb-release | cut -c 18-` && \
 
 # -----------------------------------------
 
-# update security libraries in the base image
-RUN pip install pyopenssl==0.12
-RUN pip install cffi --upgrade \
-#    && pip install ndg-httpsclient --upgrade \
-    && pip install pyasn1 --upgrade \
-    && pip install requests --upgrade \
-    && pip install fisher --upgrade \
-    && pip install 'requests[security]' --upgrade
+# Fix Python SSL warnings for python < 2.7.9 (system python on Trusty is 2.7.6)
+# https://github.com/pypa/pip/issues/4098
+RUN pip install pip==8.1.2
+RUN pip install --disable-pip-version-check requests requests_toolbelt pyopenssl --upgrade
 
 # -----------------------------------------
 
 # most recent rpy2 no longer support python2.7
-RUN pip install rpy2==2.8.3
+RUN pip install rpy2==2.8.3 && \
+    pip install fisher
 
 COPY ./ /kb/module
 RUN mkdir -p /kb/module/work

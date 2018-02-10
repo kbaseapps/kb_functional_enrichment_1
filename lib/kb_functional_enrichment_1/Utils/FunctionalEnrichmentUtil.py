@@ -346,7 +346,7 @@ class FunctionalEnrichmentUtil:
         _get_immediate_parents: get immediate parents go_ids for a given go_id
         """
         parent_ids = []
-        antology_info = ontology_hash.get(go_id)
+        antology_info = ontology_hash.get(go_id, {})
 
         if is_a_relationship:
             is_a_parents = antology_info.get('is_a')
@@ -413,7 +413,7 @@ class FunctionalEnrichmentUtil:
             go_id_parent_ids_map.update(fetch_result) 
 
         end = time.time()
-        print 'used {:.2f} s'.format(end - start)
+        print('used {:.2f} s'.format(end - start))
 
         return go_id_parent_ids_map
 
@@ -531,6 +531,8 @@ class FunctionalEnrichmentUtil:
         adjusted_p_values = stats.p_adjust(FloatVector(all_raw_p_value), method='fdr')
 
         for go_id, go_info in go_info_map.iteritems():
+            if go_id not in ontology_hash:
+                continue
             adjusted_p_value = adjusted_p_values[go_info.get('pos')]
             namespace = ontology_hash[go_id]['namespace']
             enrichment_map.update({go_id: {'raw_p_value': go_info.get('raw_p_value'),
