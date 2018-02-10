@@ -73,7 +73,7 @@ FEATURES             Location/Qualifiers
                      /gene="REV7"
                      /locus_tag="b2"
                      /gene_synonym="blah2; dah2;"
-                     /db_xref="Madeup:ref2"
+                     /db_xref="GO:DoesNotExist"
                      /db_xref="something:2"
      CDS             complement(3300..4037)
                      /gene="REV7"
@@ -81,7 +81,7 @@ FEATURES             Location/Qualifiers
                      /codon_start=1
                      /product="Rev7p"
                      /protein_id="AAA98667.1"
-                     /db_xref="GI:1293616"
+                     /db_xref="GO:DoesNotExist"
                      /translation="MNRWVEKWLRVYLKCYINLILFYRNVYPPQSFDYTTYQSFNLPQ
                      FVPINRHPALIDYIEELILDVLSKLTHVYRFSICIINKKNDLCIEKYVLDFSELQHVD
                      KDDQIITETEVFDEFRSSLNSLIMHLEKLPKVNDDTITFEAVINAIELELGHKLDRNR

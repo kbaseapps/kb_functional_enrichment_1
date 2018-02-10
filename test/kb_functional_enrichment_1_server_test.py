@@ -156,3 +156,31 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
 
         self.assertTrue('report_name' in result)
         self.assertTrue('report_ref' in result)
+
+    def test_run_fe1_propagation(self):
+
+        input_params = {
+            'feature_set_ref': self.feature_set_ref,
+            'workspace_name': self.getWsName(),
+            'propagation': 1,
+            'filter_ref_features': 1
+        }
+
+        result = self.getImpl().run_fe1(self.getContext(), input_params)[0]
+
+        self.assertTrue('result_directory' in result)
+        result_files = os.listdir(result['result_directory'])
+        print(result_files)
+        expect_result_files = ['functional_enrichment.csv']
+        self.assertTrue(all(x in result_files for x in expect_result_files))
+
+        with open(os.path.join(result['result_directory'],
+                  'functional_enrichment.csv'), 'rb') as f:
+            reader = csv.reader(f)
+            header = reader.next()
+            expected_header = ['term_id', 'term', 'ontology', 'num_in_feature_set',
+                               'num_in_ref_genome', 'raw_p_value', 'adjusted_p_value']
+            self.assertTrue(all(x in header for x in expected_header))
+
+        self.assertTrue('report_name' in result)
+        self.assertTrue('report_ref' in result)
