@@ -9,3 +9,5 @@
 1.0.5: fix supporting file generation logic
 
 1.0.6: added icon
+
+1.0.7: ignore GO terms not in our system
