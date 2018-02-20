@@ -4,8 +4,9 @@ import os  # noqa: F401
 import json  # noqa: F401
 import time
 import requests  # noqa: F401
-import shutil
 import csv
+import shutil
+from Bio import SeqIO
 
 from os import environ
 try:
@@ -21,7 +22,7 @@ from kb_functional_enrichment_1.kb_functional_enrichment_1Impl import kb_functio
 from kb_functional_enrichment_1.kb_functional_enrichment_1Server import MethodContext
 from kb_functional_enrichment_1.authclient import KBaseAuth as _KBaseAuth
 from kb_functional_enrichment_1.Utils.FunctionalEnrichmentUtil import FunctionalEnrichmentUtil
-from GenomeFileUtil.GenomeFileUtilClient import GenomeFileUtil
+from GenomeAnnotationAPI.GenomeAnnotationAPIClient import GenomeAnnotationAPI
 from DataFileUtil.DataFileUtilClient import DataFileUtil
 
 
@@ -58,8 +59,8 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
         cls.callback_url = os.environ['SDK_CALLBACK_URL']
 
         cls.fe1_runner = FunctionalEnrichmentUtil(cls.cfg)
-        cls.gfu = GenomeFileUtil(cls.callback_url)
         cls.dfu = DataFileUtil(cls.callback_url)
+        cls.gaa = GenomeAnnotationAPI(cls.callback_url)
         cls.ws = Workspace(cls.wsURL, token=token)
 
         suffix = int(time.time() * 1000)
@@ -77,22 +78,49 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
     @classmethod
     def prepare_data(cls):
         # upload genome object
-        genbank_file_name = 'minimal.gbff'
-        genbank_file_path = os.path.join(cls.scratch, genbank_file_name)
-        shutil.copy(os.path.join('data', genbank_file_name), genbank_file_path)
+        genome_file_name = 'Escherichia_coli_042_uid161985.faa'
+        genome_file_path = os.path.join(cls.scratch, genome_file_name)
+        shutil.copy(os.path.join('data', genome_file_name), genome_file_path)
 
-        genome_object_name = 'test_Genome'
-        cls.genome_ref = cls.gfu.genbank_to_genome({'file': {'path': genbank_file_path},
-                                                    'workspace_name': cls.wsName,
-                                                    'genome_name': genome_object_name
-                                                    })['genome_ref']
+        features = []
+        for record in SeqIO.parse(genome_file_path, "fasta"):
+            id = record.id
+            sequence = str(record.seq)
+            descr = record.description
+            if len(sequence) <= 100:
+                features.append({"id": id, "location": [["bkjg", 1, "+", 10]],
+                                 "type": "CDS", "protein_translation": sequence,
+                                 "aliases": [], "annotations": [], "function": descr,
+                                 "ontology_terms": {"GO":
+                                                    {"GO:0003677": {"id": "GO:0003677",
+                                                                    "ontology_ref": "KBaseOntology/gene_ontology",
+                                                                    "term_lineage": [],
+                                                                    "term_name": "DNA binding",
+                                                                    "evidence": []},
+                                                     "GO:non_exist": {"id": "GO:non_exist",
+                                                                      "ontology_ref": "KBaseOntology/gene_ontology",
+                                                                      "term_lineage": [],
+                                                                      "term_name": "DNA-template",
+                                                                      "evidence": []}}}})
+
+        genome_obj = {"complete": 0, "contig_ids": ["1"], "contig_lengths": [10],
+                      "dna_size": 10, "domain": "Bacteria", "gc_content": 0.5,
+                      "genetic_code": 11, "id": genome_file_name, "md5": "md5",
+                      "num_contigs": 1, "scientific_name": genome_file_name,
+                      "source": "test folder", "source_id": "noid",
+                      "features": features}
+        genome_obj_name = 'test_Genome'
+        info = cls.gaa.save_one_genome_v1({'workspace': cls.wsName,
+                                           'name': genome_obj_name,
+                                           'data': genome_obj})['info']
+        cls.genome_ref = str(info[6]) + "/" + str(info[0]) + "/" + str(info[4])
 
         # upload feature set object
         test_feature_set_name = 'MyFeatureSet'
-        test_feature_set_data = {'description': 'Generated FeatureSet from DifferentialExpression',
+        test_feature_set_data = {'description': 'FeatureSet from DifferentialExpression',
                                  'element_ordering': ['b1', 'b2'],
-                                 'elements': {'b1': [cls.genome_ref],
-                                              'b2': [cls.genome_ref]}}
+                                 'elements': {'b0001': [cls.genome_ref],
+                                              'b0002': [cls.genome_ref]}}
 
         save_object_params = {
             'id': cls.dfu.ws_name_to_id(cls.wsName),
