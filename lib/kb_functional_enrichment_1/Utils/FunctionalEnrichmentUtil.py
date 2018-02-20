@@ -50,8 +50,8 @@ class FunctionalEnrichmentUtil:
             if p not in params:
                 raise ValueError('"{}" parameter is required, but missing'.format(p))
 
-    def _generate_report(self, enrichment_map, result_directory, workspace_name, 
-                         feature_id_go_id_list_map, feature_set_ids, genome_ref, 
+    def _generate_report(self, enrichment_map, result_directory, workspace_name,
+                         feature_id_go_id_list_map, feature_set_ids, genome_ref,
                          go_id_parent_ids_map, feature_ids):
         """
         _generate_report: generate summary report
@@ -86,18 +86,18 @@ class FunctionalEnrichmentUtil:
 
         return report_output
 
-    def _generate_supporting_files(self, result_directory, enrichment_map, 
+    def _generate_supporting_files(self, result_directory, enrichment_map,
                                    feature_id_go_id_list_map, feature_set_ids, genome_ref,
                                    go_id_parent_ids_map, feature_ids):
         """
-        _generate_supporting_files: generate varies debug files 
+        _generate_supporting_files: generate varies debug files
         """
         supporting_files = list()
 
         feature_id_go_ids_map_file = os.path.join(result_directory, 'feature_id_go_ids_map.txt')
-        go_id_genome_feature_ids_map_file = os.path.join(result_directory, 
+        go_id_genome_feature_ids_map_file = os.path.join(result_directory,
                                                          'go_id_genome_feature_ids_map.txt')
-        go_id_set_feature_ids_map_file = os.path.join(result_directory, 
+        go_id_set_feature_ids_map_file = os.path.join(result_directory,
                                                       'go_id_feature_set_feature_ids_map.txt')
         feature_ids_file = os.path.join(result_directory, 'feature_ids.txt')
         feature_set_ids_file = os.path.join(result_directory, 'feature_set_ids.txt')
@@ -119,7 +119,7 @@ class FunctionalEnrichmentUtil:
         for feature_id, go_ids in feature_id_go_id_list_map.iteritems():
             if isinstance(go_ids, list):
                 feature_ids_with_feature.append(feature_id)
-        genome_name = self.ws.get_object_info3({'objects': 
+        genome_name = self.ws.get_object_info3({'objects':
                                                 [{'ref': genome_ref}]})['infos'][0][1]
 
         with open(go_id_parent_ids_map_file, 'wb') as go_id_parent_ids_map_file:
@@ -140,10 +140,10 @@ class FunctionalEnrichmentUtil:
                     feature_ids_file.write('{} {}\n'.format(feature_id,
                                                             feature_id in feature_set_ids))
                     if isinstance(go_ids, str):
-                        feature_id_go_ids_map_file.write('{} {}\n'.format(feature_id, 
+                        feature_id_go_ids_map_file.write('{} {}\n'.format(feature_id,
                                                                           go_ids))
                     else:
-                        feature_id_go_ids_map_file.write('{} {}\n'.format(feature_id, 
+                        feature_id_go_ids_map_file.write('{} {}\n'.format(feature_id,
                                                                           ', '.join(go_ids)))
 
         with open(go_id_genome_feature_ids_map_file, 'wb') as go_id_genome_feature_ids_map_file:
@@ -151,12 +151,15 @@ class FunctionalEnrichmentUtil:
                 with open(fisher_variables_file, 'wb') as fisher_variables_file:
                     for go_id, go_info in enrichment_map.iteritems():
                         mapped_features = go_info.get('mapped_features')
-                        fs_mapped_features = list(set(mapped_features).intersection(feature_set_ids))
-                        mapped_features_line = '{}: {}\n'.format(go_id, ', '.join(mapped_features))
+                        fs_mapped_features = list(set(mapped_features).intersection(
+                          feature_set_ids))
+                        mapped_features_line = '{}: {}\n'.format(go_id,
+                                                                 ', '.join(mapped_features))
                         go_id_genome_feature_ids_map_file.write(mapped_features_line)
 
                         set_mapped_features_line = '{}: {}\n'.format(go_id,
-                                                                     ', '.join(fs_mapped_features))
+                                                                     ', '.join(
+                                                                      fs_mapped_features))
                         go_id_set_feature_ids_map_file.write(set_mapped_features_line)
                         a_value = go_info.get('num_in_subset_feature_set')
                         b_value = len(feature_set_ids) - a_value
@@ -173,7 +176,7 @@ class FunctionalEnrichmentUtil:
         result_file = os.path.join(result_directory, 'supporting_files.zip')
         with zipfile.ZipFile(result_file, 'w', zipfile.ZIP_DEFLATED, allowZip64=True) as zip_file:
             for supporting_file in supporting_files:
-                zip_file.write(supporting_file, 
+                zip_file.write(supporting_file,
                                os.path.basename(supporting_file))
 
         return [{'path': result_file,
@@ -181,7 +184,7 @@ class FunctionalEnrichmentUtil:
                  'label': os.path.basename(result_file),
                  'description': 'GO term functional enrichment supporting files'}]
 
-    def _generate_output_file_list(self, result_directory, enrichment_map, 
+    def _generate_output_file_list(self, result_directory, enrichment_map,
                                    feature_id_go_id_list_map, feature_set_ids, genome_ref,
                                    go_id_parent_ids_map, feature_ids):
         """
@@ -207,8 +210,8 @@ class FunctionalEnrichmentUtil:
                              'label': os.path.basename(result_file),
                              'description': 'GO term functional enrichment'})
 
-        supporting_files = self._generate_supporting_files(result_directory, 
-                                                           enrichment_map, 
+        supporting_files = self._generate_supporting_files(result_directory,
+                                                           enrichment_map,
                                                            feature_id_go_id_list_map,
                                                            feature_set_ids,
                                                            genome_ref,
@@ -231,10 +234,10 @@ class FunctionalEnrichmentUtil:
         result_file_path = os.path.join(output_directory, 'report.html')
 
         enrichment_table = ''
-        data = csv.DictReader(open(os.path.join(result_directory, 'functional_enrichment.csv')), 
+        data = csv.DictReader(open(os.path.join(result_directory, 'functional_enrichment.csv')),
                               delimiter=',')
         sortedlist = sorted(data, key=lambda row: (float(row['raw_p_value']),
-                                                   float(row['num_in_ref_genome'])), 
+                                                   float(row['num_in_ref_genome'])),
                             reverse=True)
 
         for row in sortedlist:
@@ -340,8 +343,8 @@ class FunctionalEnrichmentUtil:
 
         return feature_set_ids, genome_ref_array[0]
 
-    def _get_immediate_parents(self, ontology_hash, go_id, 
-                               is_a_relationship, regulates_relationship, part_of_relationship):
+    def _get_immediate_parents(self, ontology_hash, go_id, is_a_relationship,
+                               regulates_relationship, part_of_relationship):
         """
         _get_immediate_parents: get immediate parents go_ids for a given go_id
         """
@@ -371,27 +374,27 @@ class FunctionalEnrichmentUtil:
 
         return parent_ids
 
-    def _fetch_all_parents_go_ids(self, ontology_hash, go_id, 
-                                  is_a_relationship, regulates_relationship, part_of_relationship):
+    def _fetch_all_parents_go_ids(self, ontology_hash, go_id, is_a_relationship,
+                                  regulates_relationship, part_of_relationship):
         """
         _fetch_all_parents_go_ids: recusively fetch all parent go_ids
         """
 
-        parent_ids = self._get_immediate_parents(ontology_hash, go_id, 
-                                                 is_a_relationship, regulates_relationship, 
+        parent_ids = self._get_immediate_parents(ontology_hash, go_id,
+                                                 is_a_relationship, regulates_relationship,
                                                  part_of_relationship)
         if parent_ids:
             grand_parent_ids = parent_ids
             for parent_id in parent_ids:
-                grand_parent_ids += self._fetch_all_parents_go_ids(ontology_hash, parent_id, 
-                                                                   is_a_relationship, 
-                                                                   regulates_relationship, 
+                grand_parent_ids += self._fetch_all_parents_go_ids(ontology_hash, parent_id,
+                                                                   is_a_relationship,
+                                                                   regulates_relationship,
                                                                    part_of_relationship)[parent_id]
             return {go_id: list(set(grand_parent_ids))}
         else:
             return {go_id: []}
 
-    def _generate_parent_child_map(self, ontology_hash, go_ids, 
+    def _generate_parent_child_map(self, ontology_hash, go_ids,
                                    is_a_relationship=True,
                                    regulates_relationship=True,
                                    part_of_relationship=False):
@@ -403,14 +406,14 @@ class FunctionalEnrichmentUtil:
         start = time.time()
 
         go_id_parent_ids_map = {}
-        
+
         for go_id in go_ids:
-            fetch_result = self._fetch_all_parents_go_ids(ontology_hash, go_id, 
-                                                          is_a_relationship, 
-                                                          regulates_relationship, 
+            fetch_result = self._fetch_all_parents_go_ids(ontology_hash, go_id,
+                                                          is_a_relationship,
+                                                          regulates_relationship,
                                                           part_of_relationship)
 
-            go_id_parent_ids_map.update(fetch_result) 
+            go_id_parent_ids_map.update(fetch_result)
 
         end = time.time()
         print('used {:.2f} s'.format(end - start))
@@ -433,7 +436,7 @@ class FunctionalEnrichmentUtil:
 
         required params:
         feature_set_ref: FeatureSet object reference
-        workspace_name: the name of the workspace it gets saved to      
+        workspace_name: the name of the workspace it gets saved to
 
         optional params:
         propagation: includes is_a relationship to all go terms (default is 1)
@@ -456,9 +459,9 @@ class FunctionalEnrichmentUtil:
 
         feature_set_ids, genome_ref = self._process_feature_set(params.get('feature_set_ref'))
 
-        (feature_id_go_id_list_map, 
+        (feature_id_go_id_list_map,
          go_id_feature_id_list_map,
-         go_id_go_term_map, 
+         go_id_go_term_map,
          feature_id_feature_info_map) = self._get_go_maps_from_genome(genome_ref)
 
         if filter_ref_features:
@@ -479,7 +482,7 @@ class FunctionalEnrichmentUtil:
         ontology_hash.update(ontologies[1]['data']['term_hash'])
 
         if propagation:
-            go_id_parent_ids_map = self._generate_parent_child_map(ontology_hash, 
+            go_id_parent_ids_map = self._generate_parent_child_map(ontology_hash,
                                                                    go_id_go_term_map.keys(),
                                                                    regulates_relationship=False)
         else:
@@ -538,7 +541,7 @@ class FunctionalEnrichmentUtil:
             enrichment_map.update({go_id: {'raw_p_value': go_info.get('raw_p_value'),
                                            'adjusted_p_value': adjusted_p_value,
                                            'num_in_ref_genome': go_info.get('num_in_ref_genome'),
-                                           'num_in_subset_feature_set': 
+                                           'num_in_subset_feature_set':
                                            go_info.get('num_in_subset_feature_set'),
                                            'go_term': go_id_go_term_map.get(go_id),
                                            'namespace': namespace.split("_")[1][0].upper(),
