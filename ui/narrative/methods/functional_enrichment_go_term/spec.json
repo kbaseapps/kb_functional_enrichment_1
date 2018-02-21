@@ -65,8 +65,8 @@
           "ui_name": "right_tailed"
         },
         {
-          "value": "Two Tailed",
-          "display": "two_tailed",
+          "display": "Two Tailed",
+          "value": "two_tailed",
           "id": "two_tailed",
           "ui_name": "two_tailed"
         }
