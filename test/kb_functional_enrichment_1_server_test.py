@@ -118,9 +118,8 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
         # upload feature set object
         test_feature_set_name = 'MyFeatureSet'
         test_feature_set_data = {'description': 'FeatureSet from DifferentialExpression',
-                                 'element_ordering': ['b1', 'b2'],
-                                 'elements': {'b0001': [cls.genome_ref],
-                                              'b0002': [cls.genome_ref]}}
+                                 'element_ordering': ['gi|387605483|ref|YP_006094339.1|'],
+                                 'elements': {'gi|387605483|ref|YP_006094339.1|': [cls.genome_ref]}}
 
         save_object_params = {
             'id': cls.dfu.ws_name_to_id(cls.wsName),

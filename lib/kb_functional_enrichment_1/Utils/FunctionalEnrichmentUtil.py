@@ -519,10 +519,11 @@ class FunctionalEnrichmentUtil:
         pos = 0
         for go_id, go_term in go_id_go_term_map.iteritems():
             mapped_features = go_id_feature_id_list_map.get(go_id)
-            if ignore_go_term_not_in_feature_set and not mapped_features:
-                continue
             # in feature_set matches go_id
             a = len(set(mapped_features).intersection(feature_set_ids))
+            # ignore go term analysis if not associated with FeatureSet
+            if ignore_go_term_not_in_feature_set and a == 0:
+                continue
             # in feature_set doesn't match go_id
             b = len(feature_set_ids) - a
             # not in feature_set matches go_id
