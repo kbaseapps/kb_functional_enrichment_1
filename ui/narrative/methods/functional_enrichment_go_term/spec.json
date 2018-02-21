@@ -96,7 +96,7 @@
         },
         {
             "constant_value"  : 1,
-            "target_property" : "ignore_go_term_not_in_feature_set",
+            "target_property" : "ignore_go_term_not_in_feature_set"
         }],
       "output_mapping" : [
         {
