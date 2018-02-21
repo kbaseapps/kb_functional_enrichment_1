@@ -1,7 +1,7 @@
 #
 # Define basic display information
 #
-name     : Functional Enrichment For GO Term - v1.0.3
+name     : Functional Enrichment For GO Term - v1.0.8
 
 icon: kb-purple.png
 
@@ -42,5 +42,18 @@ parameters :
       Filter Reference Genome Features
     short-hint : |
       Filter reference genome features with no go terms
+
+  statistical_significance :
+    ui-name : |
+      Statistical Significance
+    short-hint : |
+      Left/Right or both tailed statistical significance (https://en.wikipedia.org/wiki/One-_and_two-tailed_tests)
+
+  ignore_go_term_not_in_feature_set :
+    ui-name : |
+      Ignore GO terms not associated with FeatureSet
+    short-hint : |
+      Ignore Go term analysis if term is not associated with FeatureSet
+
 description : |
     <p></p>

@@ -126,6 +126,8 @@ FEOneInput is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a string
 	propagation has a value which is a kb_functional_enrichment_1.boolean
 	filter_ref_features has a value which is a kb_functional_enrichment_1.boolean
+	statistical_significance has a value which is a string
+	ignore_go_term_not_in_feature_set has a value which is a kb_functional_enrichment_1.boolean
 obj_ref is a string
 boolean is an int
 FEOneResult is a reference to a hash where the following keys are defined:
@@ -146,6 +148,8 @@ FEOneInput is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a string
 	propagation has a value which is a kb_functional_enrichment_1.boolean
 	filter_ref_features has a value which is a kb_functional_enrichment_1.boolean
+	statistical_significance has a value which is a string
+	ignore_go_term_not_in_feature_set has a value which is a kb_functional_enrichment_1.boolean
 obj_ref is a string
 boolean is an int
 FEOneResult is a reference to a hash where the following keys are defined:
@@ -377,6 +381,8 @@ workspace_name: the name of the workspace it gets saved to
 optional params:
 propagation: includes is_a relationship to all go terms (default is 1)
 filter_ref_features: filter reference genome features with no go terms (default is 0)
+statistical_significance: parameter for statistical significance. Select one from left_tailed, right_tailed or two_tailed (default is left_tailed)
+ignore_go_term_not_in_feature_set: ignore Go term analysis if term is not associated with FeatureSet (default is 1)
 
 
 =item Definition
@@ -389,6 +395,8 @@ feature_set_ref has a value which is a kb_functional_enrichment_1.obj_ref
 workspace_name has a value which is a string
 propagation has a value which is a kb_functional_enrichment_1.boolean
 filter_ref_features has a value which is a kb_functional_enrichment_1.boolean
+statistical_significance has a value which is a string
+ignore_go_term_not_in_feature_set has a value which is a kb_functional_enrichment_1.boolean
 
 </pre>
 
@@ -401,6 +409,8 @@ feature_set_ref has a value which is a kb_functional_enrichment_1.obj_ref
 workspace_name has a value which is a string
 propagation has a value which is a kb_functional_enrichment_1.boolean
 filter_ref_features has a value which is a kb_functional_enrichment_1.boolean
+statistical_significance has a value which is a string
+ignore_go_term_not_in_feature_set has a value which is a kb_functional_enrichment_1.boolean
 
 
 =end text

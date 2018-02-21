@@ -20,6 +20,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * optional params:
  * propagation: includes is_a relationship to all go terms (default is 1)
  * filter_ref_features: filter reference genome features with no go terms (default is 0)
+ * statistical_significance: parameter for statistical significance. Select one from left_tailed, right_tailed or two_tailed (default is left_tailed)
+ * ignore_go_term_not_in_feature_set: ignore Go term analysis if term is not associated with FeatureSet (default is 1)
  * </pre>
  * 
  */
@@ -29,7 +31,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "feature_set_ref",
     "workspace_name",
     "propagation",
-    "filter_ref_features"
+    "filter_ref_features",
+    "statistical_significance",
+    "ignore_go_term_not_in_feature_set"
 })
 public class FEOneInput {
 
@@ -41,6 +45,10 @@ public class FEOneInput {
     private Long propagation;
     @JsonProperty("filter_ref_features")
     private Long filterRefFeatures;
+    @JsonProperty("statistical_significance")
+    private String statisticalSignificance;
+    @JsonProperty("ignore_go_term_not_in_feature_set")
+    private Long ignoreGoTermNotInFeatureSet;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("feature_set_ref")
@@ -103,6 +111,36 @@ public class FEOneInput {
         return this;
     }
 
+    @JsonProperty("statistical_significance")
+    public String getStatisticalSignificance() {
+        return statisticalSignificance;
+    }
+
+    @JsonProperty("statistical_significance")
+    public void setStatisticalSignificance(String statisticalSignificance) {
+        this.statisticalSignificance = statisticalSignificance;
+    }
+
+    public FEOneInput withStatisticalSignificance(String statisticalSignificance) {
+        this.statisticalSignificance = statisticalSignificance;
+        return this;
+    }
+
+    @JsonProperty("ignore_go_term_not_in_feature_set")
+    public Long getIgnoreGoTermNotInFeatureSet() {
+        return ignoreGoTermNotInFeatureSet;
+    }
+
+    @JsonProperty("ignore_go_term_not_in_feature_set")
+    public void setIgnoreGoTermNotInFeatureSet(Long ignoreGoTermNotInFeatureSet) {
+        this.ignoreGoTermNotInFeatureSet = ignoreGoTermNotInFeatureSet;
+    }
+
+    public FEOneInput withIgnoreGoTermNotInFeatureSet(Long ignoreGoTermNotInFeatureSet) {
+        this.ignoreGoTermNotInFeatureSet = ignoreGoTermNotInFeatureSet;
+        return this;
+    }
+
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
@@ -115,7 +153,7 @@ public class FEOneInput {
 
     @Override
     public String toString() {
-        return ((((((((((("FEOneInput"+" [featureSetRef=")+ featureSetRef)+", workspaceName=")+ workspaceName)+", propagation=")+ propagation)+", filterRefFeatures=")+ filterRefFeatures)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((("FEOneInput"+" [featureSetRef=")+ featureSetRef)+", workspaceName=")+ workspaceName)+", propagation=")+ propagation)+", filterRefFeatures=")+ filterRefFeatures)+", statisticalSignificance=")+ statisticalSignificance)+", ignoreGoTermNotInFeatureSet=")+ ignoreGoTermNotInFeatureSet)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }
