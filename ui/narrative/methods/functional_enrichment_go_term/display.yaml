@@ -49,11 +49,5 @@ parameters :
     short-hint : |
       Left/Right or both tailed statistical significance (https://en.wikipedia.org/wiki/One-_and_two-tailed_tests)
 
-  ignore_go_term_not_in_feature_set :
-    ui-name : |
-      Ignore GO terms not associated with FeatureSet
-    short-hint : |
-      Ignore Go term analysis if term is not associated with FeatureSet
-
 description : |
     <p></p>
