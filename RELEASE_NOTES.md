@@ -11,3 +11,7 @@
 1.0.6: added icon
 
 1.0.7: ignore GO terms not in our system
+
+1.0.8: multiple refactors including options for statistical_significance and ignore_go_term_not_in_feature_set
+	   round raw p-value to three decimal points, sort result report by corrected p-values
+
