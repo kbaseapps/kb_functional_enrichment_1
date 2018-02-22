@@ -421,6 +421,15 @@ class FunctionalEnrichmentUtil:
 
         return go_id_parent_ids_map
 
+    def _round(self, number, digits=3):
+        """
+        round number to given digits
+        """
+
+        round_number = format(number, '.{}g'.format(digits))
+
+        return round_number
+
     def __init__(self, config):
         self.ws_url = config['workspace-url']
         self.callback_url = config['SDK_CALLBACK_URL']
@@ -534,11 +543,11 @@ class FunctionalEnrichmentUtil:
 
             fisher_value = fisher.pvalue(a, b, c, d)
             if statistical_significance == 'left_tailed':
-                raw_p_value = round(fisher_value.left_tail, 3)
+                raw_p_value = self._round(fisher_value.left_tail)
             elif statistical_significance == 'right_tailed':
-                raw_p_value = round(fisher_value.right_tail, 3)
+                raw_p_value = self._round(fisher_value.right_tail)
             elif statistical_significance == 'two_tailed':
-                raw_p_value = round(fisher_value.two_tail, 3)
+                raw_p_value = self._round(fisher_value.two_tail)
             else:
                 raise ValueError('Improper statistical_significance value')
 
@@ -556,7 +565,8 @@ class FunctionalEnrichmentUtil:
         for go_id, go_info in go_info_map.iteritems():
             if go_id not in ontology_hash:
                 continue
-            adjusted_p_value = round(adjusted_p_values[go_info.get('pos')], 3)
+
+            adjusted_p_value = self._round(adjusted_p_values[go_info.get('pos')])
             namespace = ontology_hash[go_id]['namespace']
             enrichment_map.update({go_id: {'raw_p_value': go_info.get('raw_p_value'),
                                            'adjusted_p_value': adjusted_p_value,
