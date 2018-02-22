@@ -48,7 +48,7 @@
     "optional": false,
     "advanced": false,
     "allow_multiple": false,
-    "default_values": ["left_tailed"],
+    "default_values": ["right_tailed"],
     "field_type": "dropdown",
     "dropdown_options":{
         "options": [
