@@ -239,7 +239,7 @@ class FunctionalEnrichmentUtil:
         sortedlist = sorted(data, key=lambda row: (float(row['adjusted_p_value']),
                                                    float(row['raw_p_value']),
                                                    float(row['num_in_ref_genome'])),
-                            reverse=True)
+                            reverse=False)
 
         for row in sortedlist:
             # if row['num_in_feature_set'] != '0':
