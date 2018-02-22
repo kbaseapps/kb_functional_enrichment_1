@@ -556,7 +556,7 @@ class FunctionalEnrichmentUtil:
         for go_id, go_info in go_info_map.iteritems():
             if go_id not in ontology_hash:
                 continue
-            adjusted_p_value = adjusted_p_values[go_info.get('pos')]
+            adjusted_p_value = round(adjusted_p_values[go_info.get('pos')], 3)
             namespace = ontology_hash[go_id]['namespace']
             enrichment_map.update({go_id: {'raw_p_value': go_info.get('raw_p_value'),
                                            'adjusted_p_value': adjusted_p_value,
