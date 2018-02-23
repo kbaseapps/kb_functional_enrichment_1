@@ -1,12 +1,12 @@
 #
 # Define basic display information
 #
-name     : Functional Enrichment For GO Term - v1.0.8
+name     : Functional Enrichment for GO Terms - v1.0.8
 
 icon: kb-purple.png
 
 tooltip  : |
-    Create GO term enrichment from feature set and reference genome
+    Compute GO term enrichment for genomic features
 screenshots :
     []
 
@@ -27,27 +27,27 @@ method-suggestions :
 parameters :
   feature_set_ref :
     ui-name : |
-      Feature Set Object
+      FeatureSet Object
     short-hint : |
-      Feature Set Object
+      FeatureSet Object
 
   propagation :
     ui-name : |
-      Propagation
+      Parent-Child Term Propagation
     short-hint : |
-      Include parent-child relationship to go terms 
+      Apply GO term parent-child relationships to add parent term annotations
 
   filter_ref_features :
     ui-name : |
-      Filter Reference Genome Features
+      Compute Enrichment for Unlabeled Features
     short-hint : |
-      Filter reference genome features with no go terms
+      Exclude reference genome features with no GO term annotations
 
   statistical_significance :
     ui-name : |
-      Statistical Significance
+      Statistical Test
     short-hint : |
-      Left/Right or both tailed statistical significance (https://en.wikipedia.org/wiki/One-_and_two-tailed_tests)
+      Left or right-tailed Fisher Exact test for statistical significance (https://en.wikipedia.org/wiki/One-_and_two-tailed_tests)
 
 description : |
     <p></p>
