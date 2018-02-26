@@ -39,7 +39,7 @@ parameters :
 
   filter_ref_features :
     ui-name : |
-      Compute Enrichment for Unlabeled Features
+      Do Not Compute Enrichment For Unlabeled Features
     short-hint : |
       Exclude reference genome features with no GO term annotations
 
