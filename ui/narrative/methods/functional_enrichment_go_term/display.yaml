@@ -37,11 +37,11 @@ parameters :
     short-hint : |
       Apply GO term parent-child relationships to add parent term annotations
 
-  filter_ref_features :
-    ui-name : |
-      Do Not Compute Enrichment For Unlabeled Features
-    short-hint : |
-      Exclude reference genome features with no GO term annotations
+  # filter_ref_features :
+  #   ui-name : |
+  #     Do Not Compute Enrichment For Unlabeled Features
+  #   short-hint : |
+  #     Exclude reference genome features with no GO term annotations
 
   statistical_significance :
     ui-name : |
