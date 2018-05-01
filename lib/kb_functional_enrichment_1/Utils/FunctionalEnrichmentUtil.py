@@ -248,8 +248,8 @@ class FunctionalEnrichmentUtil:
             enrichment_table += '<td>{}</td>'.format(row['ontology'])
             enrichment_table += '<td>{}</td>'.format(row['num_in_feature_set'])
             enrichment_table += '<td>{}</td>'.format(row['num_in_ref_genome'])
-            enrichment_table += '<td>{}</td>'.format(row['raw_p_value'])
-            enrichment_table += '<td>{}</td></tr>'.format(row['adjusted_p_value'])
+            enrichment_table += '<td>{:.3g}</td>'.format(float(row['raw_p_value']))
+            enrichment_table += '<td>{:.3g}</td></tr>'.format(float(row['adjusted_p_value']))
 
         with open(result_file_path, 'w') as result_file:
             with open(os.path.join(os.path.dirname(__file__), 'report_template.html'),
