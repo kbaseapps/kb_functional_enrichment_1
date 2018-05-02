@@ -1,4 +1,4 @@
-FROM kbase/kbase:sdkbase.latest
+FROM kbase/kbase:sdkbase2.latest
 MAINTAINER KBase Developer
 # -----------------------------------------
 # In this section, you can install any system dependencies required
@@ -20,13 +20,6 @@ RUN CODENAME=`grep CODENAME /etc/lsb-release | cut -c 18-` && \
     sudo apt-get update && \
     yes '' | sudo apt-get -y install r-base && \
     yes '' | sudo apt-get -y install r-base-dev
-
-# -----------------------------------------
-
-# Fix Python SSL warnings for python < 2.7.9 (system python on Trusty is 2.7.6)
-# https://github.com/pypa/pip/issues/4098
-RUN pip install pip==8.1.2
-RUN pip install --disable-pip-version-check requests requests_toolbelt pyopenssl --upgrade
 
 # -----------------------------------------
 
