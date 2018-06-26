@@ -115,6 +115,14 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
                                            'data': genome_obj})['info']
         cls.genome_ref = str(info[6]) + "/" + str(info[0]) + "/" + str(info[4])
 
+        # save empty genome
+        genome_obj_name = 'bad_test_Genome'
+        genome_obj['features'] = []
+        info = cls.gaa.save_one_genome_v1({'workspace': cls.wsName,
+                                           'name': genome_obj_name,
+                                           'data': genome_obj})['info']
+        bad_genome_ref = str(info[6]) + "/" + str(info[0]) + "/" + str(info[4])
+
         # upload feature set object
         test_feature_set_name = 'MyFeatureSet'
         test_feature_set_data = {'description': 'FeatureSet from DifferentialExpression',
@@ -130,6 +138,34 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
 
         dfu_oi = cls.dfu.save_objects(save_object_params)[0]
         cls.feature_set_ref = str(dfu_oi[6]) + '/' + str(dfu_oi[0]) + '/' + str(dfu_oi[4])
+
+        # upload bad feature set objects
+        test_feature_set_name = 'BadFeatureSet1'
+        test_feature_set_data['elements']['gi|387605483|ref|YP_006094339.1|'] = [bad_genome_ref]
+        save_object_params = {
+            'id': cls.dfu.ws_name_to_id(cls.wsName),
+            'objects': [{'type': 'KBaseCollections.FeatureSet',
+                         'data': test_feature_set_data,
+                         'name': test_feature_set_name}]
+        }
+
+        dfu_oi = cls.dfu.save_objects(save_object_params)[0]
+        cls.bad_genome_feature_set = str(dfu_oi[6]) + '/' + str(dfu_oi[0]) + '/' + str(dfu_oi[4])
+
+        test_feature_set_name = 'BadFeatureSet2'
+        test_feature_set_data = {'description': 'FeatureSet from DifferentialExpression',
+                                 'element_ordering': ['foo'],
+                                 'elements': {'foo': [cls.genome_ref]}}
+
+        save_object_params = {
+            'id': cls.dfu.ws_name_to_id(cls.wsName),
+            'objects': [{'type': 'KBaseCollections.FeatureSet',
+                         'data': test_feature_set_data,
+                         'name': test_feature_set_name}]
+        }
+
+        dfu_oi = cls.dfu.save_objects(save_object_params)[0]
+        cls.bad_id_feature_set = str(dfu_oi[6]) + '/' + str(dfu_oi[0]) + '/' + str(dfu_oi[4])
 
     def getWsClient(self):
         return self.__class__.wsClient
@@ -155,6 +191,23 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
         with self.assertRaisesRegexp(ValueError,
                                      '"workspace_name" parameter is required, but missing'):
             self.getImpl().run_fe1(self.getContext(), invalidate_input_params)
+
+        with self.assertRaisesRegexp(ValueError,
+                                     'No features in the referenced genome'):
+            self.getImpl().run_fe1(self.getContext(), {
+                'feature_set_ref': self.bad_genome_feature_set,
+                'workspace_name': self.getWsName(),
+                'propagation': 0,
+                'filter_ref_features': 1
+            })
+        with self.assertRaisesRegexp(ValueError,
+                                     'feature ids which are not present referenced genome'):
+            self.getImpl().run_fe1(self.getContext(), {
+                'feature_set_ref': self.bad_id_feature_set,
+                'workspace_name': self.getWsName(),
+                'propagation': 0,
+                'filter_ref_features': 1
+            })
 
     def test_run_fe1(self):
 
