@@ -481,8 +481,17 @@ class FunctionalEnrichmentUtil:
          go_id_go_term_map,
          feature_id_feature_info_map) = self._get_go_maps_from_genome(genome_ref)
 
+        if not len(feature_id_go_id_list_map):
+            raise ValueError("No features in the referenced genome ({}) contain ontology mappings"
+                             .format(genome_ref))
+
+        unknown_feature_ids = set(feature_set_ids) - set(feature_id_feature_info_map.keys())
+        if unknown_feature_ids:
+            raise ValueError("The specified feature set contains {} feature ids which are not "
+                             "present referenced genome".format(genome_ref))
+
         if filter_ref_features:
-            log('start filtering featrues with no term')
+            log('start filtering features with no term')
             feature_ids = []
             for feature_id, go_ids in feature_id_go_id_list_map.iteritems():
                 if isinstance(go_ids, list):
