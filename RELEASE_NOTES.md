@@ -18,3 +18,5 @@
 1.0.9: prettier pval formatting
 
 1.0.10: more input data validation
+
+1.0.11: added citations in PLOS format
