@@ -1,4 +1,4 @@
-FROM kbase/kbase:sdkbase2.latest
+FROM kbase/sdkbase2:python
 MAINTAINER KBase Developer
 # -----------------------------------------
 # In this section, you can install any system dependencies required
@@ -6,24 +6,13 @@ MAINTAINER KBase Developer
 # install line here, a git checkout to download code, or run any other
 # installation scripts.
 
-# RUN apt-get update
-
-# Here we install a python coverage tool and an
-# https library that is out of date in the base image.
-
-RUN pip install coverage
-
-# update R
-RUN CODENAME=`grep CODENAME /etc/lsb-release | cut -c 18-` && \
-    echo "deb http://cran.cnr.berkeley.edu/bin/linux/ubuntu $CODENAME/" >> /etc/apt/sources.list && \
-    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9 && \
-    sudo apt-get update && \
-    yes '' | sudo apt-get -y install r-base && \
-    yes '' | sudo apt-get -y install r-base-dev
+RUN conda install -y r-essentials r-base r-xml r-rcurl
 
 # -----------------------------------------
 
-# most recent rpy2 no longer support python2.7
+RUN apt-get update
+RUN apt-get install -y gcc libreadline6-dev
+
 RUN pip install rpy2==2.8.3 && \
     pip install fisher
 

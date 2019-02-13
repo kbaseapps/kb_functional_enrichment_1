@@ -1,19 +1,20 @@
-import time
+import csv
+import errno
 import json
+import os
 import re
+import time
+import uuid
+import zipfile
+
 import fisher
 from rpy2.robjects.packages import importr
 from rpy2.robjects.vectors import FloatVector
-import os
-import uuid
-import errno
-import csv
-import zipfile
 
-from Workspace.WorkspaceClient import Workspace as Workspace
-from DataFileUtil.DataFileUtilClient import DataFileUtil
-from KBaseReport.KBaseReportClient import KBaseReport
-from GenomeSearchUtil.GenomeSearchUtilClient import GenomeSearchUtil
+from installed_clients.DataFileUtilClient import DataFileUtil
+from installed_clients.GenomeSearchUtilClient import GenomeSearchUtil
+from installed_clients.KBaseReportClient import KBaseReport
+from installed_clients.WorkspaceClient import Workspace as Workspace
 
 
 def log(message, prefix_newline=False):
@@ -114,64 +115,55 @@ class FunctionalEnrichmentUtil:
         supporting_files.append(go_id_parent_ids_map_file)
         supporting_files.append(go_id_set_feature_ids_map_file)
 
-        total_feature_ids = feature_id_go_id_list_map.keys()
+        total_feature_ids = list(feature_id_go_id_list_map.keys())
         feature_ids_with_feature = []
-        for feature_id, go_ids in feature_id_go_id_list_map.iteritems():
+        for feature_id, go_ids in feature_id_go_id_list_map.items():
             if isinstance(go_ids, list):
                 feature_ids_with_feature.append(feature_id)
         genome_name = self.ws.get_object_info3({'objects':
                                                 [{'ref': genome_ref}]})['infos'][0][1]
 
-        with open(go_id_parent_ids_map_file, 'wb') as go_id_parent_ids_map_file:
-            for go_id, parent_ids in go_id_parent_ids_map.iteritems():
-                go_id_parent_ids_map_file.write('{}: {}\n'.format(go_id, ', '.join(parent_ids)))
+        with open(go_id_parent_ids_map_file, 'w') as go_id_parent_ids_map_file:
+            for go_id, parent_ids in go_id_parent_ids_map.items():
+                go_id_parent_ids_map_file.write(f'{go_id}: {", ".join(parent_ids)}\n')
 
-        with open(genome_info_file, 'wb') as genome_info_file:
-            genome_info_file.write('genome_name: {}\n'.format(genome_name))
-            genome_info_file.write('features: {}\n'.format(len(total_feature_ids)))
-            genome_info_file.write('features with term: {}'.format(len(feature_ids_with_feature)))
+        with open(genome_info_file, 'w') as genome_info_file:
+            genome_info_file.write(f'genome_name: {genome_name}\n')
+            genome_info_file.write(f'features: {len(total_feature_ids)}\n')
+            genome_info_file.write(f'features with term: {len(feature_ids_with_feature)}')
 
-        with open(feature_set_ids_file, 'wb') as feature_set_ids_file:
+        with open(feature_set_ids_file, 'w') as feature_set_ids_file:
             feature_set_ids_file.write('\n'.join(feature_set_ids))
 
-        with open(feature_id_go_ids_map_file, 'wb') as feature_id_go_ids_map_file:
-            with open(feature_ids_file, 'wb') as feature_ids_file:
-                for feature_id, go_ids in feature_id_go_id_list_map.iteritems():
-                    feature_ids_file.write('{} {}\n'.format(feature_id,
-                                                            feature_id in feature_set_ids))
+        with open(feature_id_go_ids_map_file, 'w') as feature_id_go_ids_map_file:
+            with open(feature_ids_file, 'w') as feature_ids_file:
+                for feature_id, go_ids in feature_id_go_id_list_map.items():
+                    feature_ids_file.write(f'{feature_id} {feature_id in feature_set_ids}\n')
                     if isinstance(go_ids, str):
-                        feature_id_go_ids_map_file.write('{} {}\n'.format(feature_id,
-                                                                          go_ids))
+                        feature_id_go_ids_map_file.write(f'{feature_id} {go_ids}\n')
                     else:
-                        feature_id_go_ids_map_file.write('{} {}\n'.format(feature_id,
-                                                                          ', '.join(go_ids)))
+                        feature_id_go_ids_map_file.write(f'{feature_id} {", ".join(go_ids)}\n')
 
-        with open(go_id_genome_feature_ids_map_file, 'wb') as go_id_genome_feature_ids_map_file:
-            with open(go_id_set_feature_ids_map_file, 'wb') as go_id_set_feature_ids_map_file:
-                with open(fisher_variables_file, 'wb') as fisher_variables_file:
-                    for go_id, go_info in enrichment_map.iteritems():
+        with open(go_id_genome_feature_ids_map_file, 'w') as go_id_genome_feature_ids_map_file:
+            with open(go_id_set_feature_ids_map_file, 'w') as go_id_set_feature_ids_map_file:
+                with open(fisher_variables_file, 'w') as fisher_variables_file:
+                    for go_id, go_info in enrichment_map.items():
                         mapped_features = go_info.get('mapped_features')
                         fs_mapped_features = list(set(mapped_features).intersection(
                           feature_set_ids))
-                        mapped_features_line = '{}: {}\n'.format(go_id,
-                                                                 ', '.join(mapped_features))
+                        mapped_features_line = f'{go_id}: {", ".join(mapped_features)}\n'
                         go_id_genome_feature_ids_map_file.write(mapped_features_line)
 
-                        set_mapped_features_line = '{}: {}\n'.format(go_id,
-                                                                     ', '.join(
-                                                                      fs_mapped_features))
+                        set_mapped_features_line = f'{go_id}: {", ".join(fs_mapped_features)}\n'
                         go_id_set_feature_ids_map_file.write(set_mapped_features_line)
                         a_value = go_info.get('num_in_subset_feature_set')
                         b_value = len(feature_set_ids) - a_value
                         c_value = len(mapped_features) - a_value
                         d_value = len(feature_ids) - len(feature_set_ids) - c_value
                         p_value = go_info.get('raw_p_value')
-                        fisher_variables_file.write('{} a:{} b:{} c:{} d:{} '.format(go_id,
-                                                                                     a_value,
-                                                                                     b_value,
-                                                                                     c_value,
-                                                                                     d_value))
-                        fisher_variables_file.write('p_value:{}\n'.format(p_value))
+                        fisher_variables_file.write(
+                            f'{go_id} a:{a_value} b:{b_value} c:{c_value} d:{d_value} ')
+                        fisher_variables_file.write(f'p_value:{p_value}\n')
 
         result_file = os.path.join(result_directory, 'supporting_files.zip')
         with zipfile.ZipFile(result_file, 'w', zipfile.ZIP_DEFLATED, allowZip64=True) as zip_file:
@@ -195,11 +187,11 @@ class FunctionalEnrichmentUtil:
         output_files = list()
 
         result_file = os.path.join(result_directory, 'functional_enrichment.csv')
-        with open(result_file, 'wb') as csv_file:
+        with open(result_file, 'w') as csv_file:
             writer = csv.writer(csv_file)
             writer.writerow(['term_id', 'term', 'ontology', 'num_in_feature_set',
                              'num_in_ref_genome', 'raw_p_value', 'adjusted_p_value'])
-            for key, value in enrichment_map.iteritems():
+            for key, value in enrichment_map.items():
                 writer.writerow([key, value['go_term'], value['namespace'],
                                  value['num_in_subset_feature_set'],
                                  value['num_in_ref_genome'], value['raw_p_value'],
@@ -243,13 +235,13 @@ class FunctionalEnrichmentUtil:
 
         for row in sortedlist:
             # if row['num_in_feature_set'] != '0':
-            enrichment_table += '<tr><td>{}</td>'.format(row['term_id'])
-            enrichment_table += '<td>{}</td>'.format(row['term'])
-            enrichment_table += '<td>{}</td>'.format(row['ontology'])
-            enrichment_table += '<td>{}</td>'.format(row['num_in_feature_set'])
-            enrichment_table += '<td>{}</td>'.format(row['num_in_ref_genome'])
-            enrichment_table += '<td>{:.3g}</td>'.format(float(row['raw_p_value']))
-            enrichment_table += '<td>{:.3g}</td></tr>'.format(float(row['adjusted_p_value']))
+            enrichment_table += f'<tr><td>{row["term_id"]}</td>'
+            enrichment_table += f'<td>{row["term"]}</td>'
+            enrichment_table += f'<td>{row["ontology"]}</td>'
+            enrichment_table += f'<td>{row["num_in_feature_set"]}</td>'
+            enrichment_table += f'<td>{row["num_in_ref_genome"]}</td>'
+            enrichment_table += f'<td>{float(row["raw_p_value"]):.3g}</td>'
+            enrichment_table += f'<td>{float(row["adjusted_p_value"]):.3g}</td></tr>'
 
         with open(result_file_path, 'w') as result_file:
             with open(os.path.join(os.path.dirname(__file__), 'report_template.html'),
@@ -297,7 +289,7 @@ class FunctionalEnrichmentUtil:
 
             go_id_list = []
             if ontology_terms:
-                for ontology_id, ontology_term in ontology_terms.iteritems():
+                for ontology_id, ontology_term in ontology_terms.items():
                     if re.match('[gG][oO]\:.*', ontology_id):
                         go_id_go_term_map.update({ontology_id: ontology_term})
                         go_id_list.append(ontology_id)
@@ -334,7 +326,7 @@ class FunctionalEnrichmentUtil:
         feature_elements = feature_set_data['elements']
         feature_set_ids = []
         genome_ref_array = []
-        for feature_id, genome_refs in feature_elements.iteritems():
+        for feature_id, genome_refs in feature_elements.items():
             feature_set_ids.append(feature_id)
             genome_ref_array += genome_refs
 
@@ -417,7 +409,7 @@ class FunctionalEnrichmentUtil:
             go_id_parent_ids_map.update(fetch_result)
 
         end = time.time()
-        print('used {:.2f} s'.format(end - start))
+        print(f'used {end - start:.2f} s')
 
         return go_id_parent_ids_map
 
@@ -426,7 +418,7 @@ class FunctionalEnrichmentUtil:
         round number to given digits
         """
 
-        round_number = format(number, '.{}g'.format(digits))
+        round_number = format(number, f'.{digits}g')
 
         return round_number
 
@@ -463,7 +455,7 @@ class FunctionalEnrichmentUtil:
         report_ref: report reference generated by KBaseReport
         """
         log('--->\nrunning FunctionalEnrichmentUtil.run_fe1\n' +
-            'params:\n{}'.format(json.dumps(params, indent=1)))
+            f'params:\n{json.dumps(params, indent=1)}')
 
         self._validate_run_fe1_params(params)
         propagation = params.get('propagation', True)
@@ -493,11 +485,11 @@ class FunctionalEnrichmentUtil:
         if filter_ref_features:
             log('start filtering features with no term')
             feature_ids = []
-            for feature_id, go_ids in feature_id_go_id_list_map.iteritems():
+            for feature_id, go_ids in feature_id_go_id_list_map.items():
                 if isinstance(go_ids, list):
                     feature_ids.append(feature_id)
         else:
-            feature_ids = feature_id_go_id_list_map.keys()
+            feature_ids = list(feature_id_go_id_list_map.keys())
 
         ontology_hash = dict()
         ontologies = self.ws.get_objects([{'workspace': 'KBaseOntology',
@@ -509,7 +501,7 @@ class FunctionalEnrichmentUtil:
 
         if propagation:
             go_id_parent_ids_map = self._generate_parent_child_map(ontology_hash,
-                                                                   go_id_go_term_map.keys(),
+                                                                   list(go_id_go_term_map.keys()),
                                                                    regulates_relationship=False)
         else:
             go_id_parent_ids_map = {}
@@ -517,7 +509,7 @@ class FunctionalEnrichmentUtil:
                 go_id_parent_ids_map.update({go_id: []})
 
         log('including parents to feature id map')
-        for go_id, parent_ids in go_id_parent_ids_map.iteritems():
+        for go_id, parent_ids in go_id_parent_ids_map.items():
             mapped_features = go_id_feature_id_list_map.get(go_id)
 
             for parent_id in parent_ids:
@@ -536,7 +528,7 @@ class FunctionalEnrichmentUtil:
         go_info_map = {}
         all_raw_p_value = []
         pos = 0
-        for go_id, go_term in go_id_go_term_map.iteritems():
+        for go_id, go_term in go_id_go_term_map.items():
             mapped_features = go_id_feature_id_list_map.get(go_id)
             # in feature_set matches go_id
             a = len(set(mapped_features).intersection(feature_set_ids))
@@ -571,7 +563,7 @@ class FunctionalEnrichmentUtil:
         stats = importr('stats')
         adjusted_p_values = stats.p_adjust(FloatVector(all_raw_p_value), method='fdr')
 
-        for go_id, go_info in go_info_map.iteritems():
+        for go_id, go_info in go_info_map.items():
             if go_id not in ontology_hash:
                 continue
 
