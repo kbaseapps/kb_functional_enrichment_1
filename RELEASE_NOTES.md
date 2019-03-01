@@ -20,3 +20,5 @@
 1.0.10: more input data validation
 
 1.0.11: added citations in PLOS format
+
+1.1.0: update to python 3

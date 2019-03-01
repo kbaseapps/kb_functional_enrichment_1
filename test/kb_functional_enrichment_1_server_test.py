@@ -1,29 +1,21 @@
 # -*- coding: utf-8 -*-
-import unittest
-import os  # noqa: F401
-import json  # noqa: F401
-import time
-import requests  # noqa: F401
 import csv
+import os  # noqa: F401
 import shutil
+import time
+import unittest
+from configparser import ConfigParser  # py3
+from os import environ
+
 from Bio import SeqIO
 
-from os import environ
-try:
-    from ConfigParser import ConfigParser  # py2
-except:
-    from configparser import ConfigParser  # py3
-
-from pprint import pprint  # noqa: F401
-
-from biokbase.workspace.client import Workspace as workspaceService
-from Workspace.WorkspaceClient import Workspace as Workspace
+from installed_clients.DataFileUtilClient import DataFileUtil
+from installed_clients.GenomeAnnotationAPIClient import GenomeAnnotationAPI
+from installed_clients.WorkspaceClient import Workspace as Workspace
+from kb_functional_enrichment_1.Utils.FunctionalEnrichmentUtil import FunctionalEnrichmentUtil
+from kb_functional_enrichment_1.authclient import KBaseAuth as _KBaseAuth
 from kb_functional_enrichment_1.kb_functional_enrichment_1Impl import kb_functional_enrichment_1
 from kb_functional_enrichment_1.kb_functional_enrichment_1Server import MethodContext
-from kb_functional_enrichment_1.authclient import KBaseAuth as _KBaseAuth
-from kb_functional_enrichment_1.Utils.FunctionalEnrichmentUtil import FunctionalEnrichmentUtil
-from GenomeAnnotationAPI.GenomeAnnotationAPIClient import GenomeAnnotationAPI
-from DataFileUtil.DataFileUtilClient import DataFileUtil
 
 
 class kb_functional_enrichment_1Test(unittest.TestCase):
@@ -53,7 +45,7 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
                              }],
                         'authenticated': 1})
         cls.wsURL = cls.cfg['workspace-url']
-        cls.wsClient = workspaceService(cls.wsURL)
+        cls.wsClient = Workspace(cls.wsURL)
         cls.serviceImpl = kb_functional_enrichment_1(cls.cfg)
         cls.scratch = cls.cfg['scratch']
         cls.callback_url = os.environ['SDK_CALLBACK_URL']
@@ -182,17 +174,17 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
     def test_bad_run_fe1_params(self):
         invalidate_input_params = {'missing_feature_set_ref': 'feature_set_ref',
                                    'workspace_name': 'workspace_name'}
-        with self.assertRaisesRegexp(ValueError,
+        with self.assertRaisesRegex(ValueError,
                                      '"feature_set_ref" parameter is required, but missing'):
             self.getImpl().run_fe1(self.getContext(), invalidate_input_params)
 
         invalidate_input_params = {'feature_set_ref': 'feature_set_ref',
                                    'missing_workspace_name': 'workspace_name'}
-        with self.assertRaisesRegexp(ValueError,
+        with self.assertRaisesRegex(ValueError,
                                      '"workspace_name" parameter is required, but missing'):
             self.getImpl().run_fe1(self.getContext(), invalidate_input_params)
 
-        with self.assertRaisesRegexp(ValueError,
+        with self.assertRaisesRegex(ValueError,
                                      'No features in the referenced genome'):
             self.getImpl().run_fe1(self.getContext(), {
                 'feature_set_ref': self.bad_genome_feature_set,
@@ -200,7 +192,7 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
                 'propagation': 0,
                 'filter_ref_features': 1
             })
-        with self.assertRaisesRegexp(ValueError,
+        with self.assertRaisesRegex(ValueError,
                                      'feature ids which are not present referenced genome'):
             self.getImpl().run_fe1(self.getContext(), {
                 'feature_set_ref': self.bad_id_feature_set,
@@ -227,18 +219,18 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
         self.assertTrue(all(x in result_files for x in expect_result_files))
 
         with open(os.path.join(result['result_directory'],
-                  'functional_enrichment.csv'), 'rb') as f:
+                  'functional_enrichment.csv'), 'r') as f:
 
             self.assertEqual(2, len(f.readlines()))
             f.seek(0, 0)
 
             reader = csv.reader(f)
-            header = reader.next()
+            header = next(reader)
             expected_header = ['term_id', 'term', 'ontology', 'num_in_feature_set',
                                'num_in_ref_genome', 'raw_p_value', 'adjusted_p_value']
             self.assertTrue(all(x in header for x in expected_header))
 
-            first_row = reader.next()
+            first_row = next(reader)
             self.assertTrue(len(first_row))
 
         self.assertTrue(result.get('report_name'))
@@ -262,18 +254,18 @@ class kb_functional_enrichment_1Test(unittest.TestCase):
         self.assertTrue(all(x in result_files for x in expect_result_files))
 
         with open(os.path.join(result['result_directory'],
-                  'functional_enrichment.csv'), 'rb') as f:
+                  'functional_enrichment.csv'), 'r') as f:
 
             self.assertEqual(2, len(f.readlines()))
             f.seek(0, 0)
 
             reader = csv.reader(f)
-            header = reader.next()
+            header = next(reader)
             expected_header = ['term_id', 'term', 'ontology', 'num_in_feature_set',
                                'num_in_ref_genome', 'raw_p_value', 'adjusted_p_value']
             self.assertTrue(all(x in header for x in expected_header))
 
-            first_row = reader.next()
+            first_row = next(reader)
             self.assertTrue(len(first_row))
 
         self.assertTrue(result.get('report_name'))

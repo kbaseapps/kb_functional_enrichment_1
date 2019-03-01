@@ -22,9 +22,9 @@ class kb_functional_enrichment_1:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "1.0.8"
-    GIT_URL = "https://github.com/Tianhao-Gu/kb_functional_enrichment_1.git"
-    GIT_COMMIT_HASH = "b79a8743df24b07d8bccc4e73997b878bdd88474"
+    VERSION = "1.1.0"
+    GIT_URL = "https://github.com/kbaseapps/kb_functional_enrichment_1.git"
+    GIT_COMMIT_HASH = "d0bbb06c6ef161631f54f9c71cfad75e24632279"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -71,11 +71,11 @@ class kb_functional_enrichment_1:
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN run_fe1
-        print '--->\nRunning kb_functional_enrichment_1.run_fe1\nparams:'
-        print json.dumps(params, indent=1)
+        print('--->\nRunning kb_functional_enrichment_1.run_fe1\nparams:')
+        print(json.dumps(params, indent=1))
 
-        for key, value in params.iteritems():
-            if isinstance(value, basestring):
+        for key, value in params.items():
+            if isinstance(value, str):
                 params[key] = value.strip()
 
         fe1_runner = FunctionalEnrichmentUtil(self.config)
