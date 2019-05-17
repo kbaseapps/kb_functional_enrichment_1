@@ -12,10 +12,9 @@ from __future__ import print_function
 try:
     # baseclient and this client are in a package
     from .baseclient import BaseClient as _BaseClient  # @UnusedImport
-except:
+except ImportError:
     # no they aren't
     from baseclient import BaseClient as _BaseClient  # @Reimport
-import time
 
 
 class GenomeSearchUtil(object):
@@ -24,7 +23,7 @@ class GenomeSearchUtil(object):
             self, url=None, timeout=30 * 60, user_id=None,
             password=None, token=None, ignore_authrc=False,
             trust_all_ssl_certificates=False,
-            auth_svc='https://kbase.us/services/authorization/Sessions/Login',
+            auth_svc='https://ci.kbase.us/services/auth/api/legacy/KBase/Sessions/Login',
             service_ver='release',
             async_job_check_time_ms=100, async_job_check_time_scale_percent=150, 
             async_job_check_max_time_ms=300000):
@@ -40,23 +39,18 @@ class GenomeSearchUtil(object):
             async_job_check_time_scale_percent=async_job_check_time_scale_percent,
             async_job_check_max_time_ms=async_job_check_max_time_ms)
 
-    def _check_job(self, job_id):
-        return self._client._check_job('GenomeSearchUtil', job_id)
-
-    def _search_submit(self, params, context=None):
-        return self._client._submit_job(
-             'GenomeSearchUtil.search', [params],
-             self._service_ver, context)
-
     def search(self, params, context=None):
         """
-        :param params: instance of type "SearchOptions" (num_found - optional
+        :param params: instance of type "SearchOptions" (structured_query -
+           Optional query in object form that uses MongoDB style key-value
+           matching and $and, $not, and $or keywords. num_found - optional
            field which when set informs that there is no need to perform full
            scan in order to count this value because it was already done
            before; please don't set this value with 0 or any guessed number
            if you didn't get right value previously.) -> structure: parameter
-           "ref" of String, parameter "query" of String, parameter "sort_by"
-           of list of type "column_sorting" -> tuple of size 2: parameter
+           "ref" of String, parameter "query" of String, parameter
+           "structured_query" of unspecified object, parameter "sort_by" of
+           list of type "column_sorting" -> tuple of size 2: parameter
            "column" of String, parameter "ascending" of type "boolean"
            (Indicates true or false values, false = 0, true = 1 @range
            [0,1]), parameter "start" of Long, parameter "limit" of Long,
@@ -68,37 +62,25 @@ class GenomeSearchUtil(object):
            "FeatureData" (aliases - mapping from alias name (key) to set of
            alias sources (value), global_location - this is location-related
            properties that are under sorting whereas items in "location"
-           array are not, feature_idx - legacy field keeping the position of
-           feature in feature array in legacy Genome object, ontology_terms -
-           mapping from term ID (key) to term name (value).) -> structure:
-           parameter "feature_id" of String, parameter "aliases" of mapping
-           from String to list of String, parameter "function" of String,
-           parameter "location" of list of type "Location" -> structure:
+           array are not, feature_array - field recording which array a
+           feature is located in (features, mrnas, cdss, non_coding_features)
+           feature_idx - field keeping the position of feature in its array
+           in a Genome object, ontology_terms - mapping from term ID (key) to
+           term name (value).) -> structure: parameter "feature_id" of
+           String, parameter "aliases" of mapping from String to list of
+           String, parameter "function" of String, parameter "location" of
+           list of type "Location" -> structure: parameter "contig_id" of
+           String, parameter "start" of Long, parameter "strand" of String,
+           parameter "length" of Long, parameter "feature_type" of String,
+           parameter "global_location" of type "Location" -> structure:
            parameter "contig_id" of String, parameter "start" of Long,
            parameter "strand" of String, parameter "length" of Long,
-           parameter "feature_type" of String, parameter "global_location" of
-           type "Location" -> structure: parameter "contig_id" of String,
-           parameter "start" of Long, parameter "strand" of String, parameter
-           "length" of Long, parameter "feature_idx" of Long, parameter
-           "ontology_terms" of mapping from String to String, parameter
-           "num_found" of Long
+           parameter "feature_array" of String, parameter "feature_idx" of
+           Long, parameter "ontology_terms" of mapping from String to String,
+           parameter "num_found" of Long
         """
-        job_id = self._search_submit(params, context)
-        async_job_check_time = self._client.async_job_check_time
-        while True:
-            time.sleep(async_job_check_time)
-            async_job_check_time = (async_job_check_time *
-                self._client.async_job_check_time_scale_percent / 100.0)
-            if async_job_check_time > self._client.async_job_check_max_time:
-                async_job_check_time = self._client.async_job_check_max_time
-            job_state = self._check_job(job_id)
-            if job_state['finished']:
-                return job_state['result'][0]
-
-    def _search_region_submit(self, params, context=None):
-        return self._client._submit_job(
-             'GenomeSearchUtil.search_region', [params],
-             self._service_ver, context)
+        return self._client.run_job('GenomeSearchUtil.search',
+                                    [params], self._service_ver, context)
 
     def search_region(self, params, context=None):
         """
@@ -120,37 +102,25 @@ class GenomeSearchUtil(object):
            mapping from alias name (key) to set of alias sources (value),
            global_location - this is location-related properties that are
            under sorting whereas items in "location" array are not,
-           feature_idx - legacy field keeping the position of feature in
-           feature array in legacy Genome object, ontology_terms - mapping
-           from term ID (key) to term name (value).) -> structure: parameter
-           "feature_id" of String, parameter "aliases" of mapping from String
-           to list of String, parameter "function" of String, parameter
-           "location" of list of type "Location" -> structure: parameter
+           feature_array - field recording which array a feature is located
+           in (features, mrnas, cdss, non_coding_features) feature_idx -
+           field keeping the position of feature in its array in a Genome
+           object, ontology_terms - mapping from term ID (key) to term name
+           (value).) -> structure: parameter "feature_id" of String,
+           parameter "aliases" of mapping from String to list of String,
+           parameter "function" of String, parameter "location" of list of
+           type "Location" -> structure: parameter "contig_id" of String,
+           parameter "start" of Long, parameter "strand" of String, parameter
+           "length" of Long, parameter "feature_type" of String, parameter
+           "global_location" of type "Location" -> structure: parameter
            "contig_id" of String, parameter "start" of Long, parameter
            "strand" of String, parameter "length" of Long, parameter
-           "feature_type" of String, parameter "global_location" of type
-           "Location" -> structure: parameter "contig_id" of String,
-           parameter "start" of Long, parameter "strand" of String, parameter
-           "length" of Long, parameter "feature_idx" of Long, parameter
-           "ontology_terms" of mapping from String to String, parameter
-           "num_found" of Long
+           "feature_array" of String, parameter "feature_idx" of Long,
+           parameter "ontology_terms" of mapping from String to String,
+           parameter "num_found" of Long
         """
-        job_id = self._search_region_submit(params, context)
-        async_job_check_time = self._client.async_job_check_time
-        while True:
-            time.sleep(async_job_check_time)
-            async_job_check_time = (async_job_check_time *
-                self._client.async_job_check_time_scale_percent / 100.0)
-            if async_job_check_time > self._client.async_job_check_max_time:
-                async_job_check_time = self._client.async_job_check_max_time
-            job_state = self._check_job(job_id)
-            if job_state['finished']:
-                return job_state['result'][0]
-
-    def _search_contigs_submit(self, params, context=None):
-        return self._client._submit_job(
-             'GenomeSearchUtil.search_contigs', [params],
-             self._service_ver, context)
+        return self._client.run_job('GenomeSearchUtil.search_region',
+                                    [params], self._service_ver, context)
 
     def search_contigs(self, params, context=None):
         """
@@ -176,28 +146,9 @@ class GenomeSearchUtil(object):
            parameter "contig_id" of String, parameter "length" of Long,
            parameter "feature_count" of Long, parameter "num_found" of Long
         """
-        job_id = self._search_contigs_submit(params, context)
-        async_job_check_time = self._client.async_job_check_time
-        while True:
-            time.sleep(async_job_check_time)
-            async_job_check_time = (async_job_check_time *
-                self._client.async_job_check_time_scale_percent / 100.0)
-            if async_job_check_time > self._client.async_job_check_max_time:
-                async_job_check_time = self._client.async_job_check_max_time
-            job_state = self._check_job(job_id)
-            if job_state['finished']:
-                return job_state['result'][0]
+        return self._client.run_job('GenomeSearchUtil.search_contigs',
+                                    [params], self._service_ver, context)
 
     def status(self, context=None):
-        job_id = self._client._submit_job('GenomeSearchUtil.status', 
-            [], self._service_ver, context)
-        async_job_check_time = self._client.async_job_check_time
-        while True:
-            time.sleep(async_job_check_time)
-            async_job_check_time = (async_job_check_time *
-                self._client.async_job_check_time_scale_percent / 100.0)
-            if async_job_check_time > self._client.async_job_check_max_time:
-                async_job_check_time = self._client.async_job_check_max_time
-            job_state = self._check_job(job_id)
-            if job_state['finished']:
-                return job_state['result'][0]
+        return self._client.run_job('GenomeSearchUtil.status',
+                                    [], self._service_ver, context)
