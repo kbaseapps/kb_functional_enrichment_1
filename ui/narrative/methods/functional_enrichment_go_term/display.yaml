@@ -6,7 +6,7 @@ name     : Functional Enrichment for GO Terms - v1.0.8
 icon: kb-purple.png
 
 tooltip  : |
-    Compute GO term enrichment for genomic features
+    Compute gene ontology (GO) term enrichment for genomic features.
 screenshots :
     []
 
@@ -29,13 +29,13 @@ parameters :
     ui-name : |
       FeatureSet Object
     short-hint : |
-      FeatureSet Object
+      The FeatureSet object for which to compute GO terms.
 
   propagation :
     ui-name : |
       Parent-Child Term Propagation
     short-hint : |
-      Apply GO term parent-child relationships to add parent term annotations
+      Apply GO term parent-child relationships to add parent term annotations.
 
   # filter_ref_features :
   #   ui-name : |
@@ -47,10 +47,12 @@ parameters :
     ui-name : |
       Statistical Test
     short-hint : |
-      Left or right-tailed Fisher Exact test for statistical significance (https://en.wikipedia.org/wiki/One-_and_two-tailed_tests)
+      Left or right-tailed Fisher Exact test for statistical significance.
 
 description : |
-    <p></p>
+    <p>This App uses the FeatureSet data object (gene identifiers) as an input. The genome from which FeatureSet has been extracted, must have gene ontology (GO) terms and must be imported into the same Narrative. This App identifies the enriched GO terms in a list of the gene identifiers and uses the one-sided Fisher Exact test to test for enrichment. Fisher Exact Test is a statistical test based on contingency tables to study the significance of the association between two kind of classifications. This App generates an enrichment table as an output widget that includes the basic functionality of annotation with GO IDs, its description, domain ontologies (e.g., biological process, molecular function, cellular process), number of genes annotated with the GO term in the FeatureSet, number of genes annotated with the GO term in the whole genome, p-value, and corrected p-value. This App also generates the supporting files as a report that includes several files such as input feature set IDs, intermediate files on mapping, and output file of feature IDs with GO terms. </p>
+
+    <p><strong>NOTE:</strong> This App can be used as one of the downstream steps in the <a href= "http://kbase.us/expression-analysis/">Transcriptomics and Expression Analysis Workflow</a> in KBase, however, it can also be run as a standalone.</p>
 
 publications :
     -
