@@ -6,15 +6,13 @@ MAINTAINER KBase Developer
 # install line here, a git checkout to download code, or run any other
 # installation scripts.
 
-RUN conda install -y r-essentials r-base r-xml r-rcurl
+RUN apt-get update && apt-get install -y gcc libreadline6-dev
 
-# -----------------------------------------
+RUN conda install python=3.6.3 numpy rpy2
 
-RUN apt-get update
-RUN apt-get install -y gcc libreadline6-dev
+RUN conda install -y r-essentials r-xml
 
-RUN pip install rpy2==2.8.3 && \
-    pip install fisher
+RUN  pip install fisher
 
 COPY ./ /kb/module
 RUN mkdir -p /kb/module/work
